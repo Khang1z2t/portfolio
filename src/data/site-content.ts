@@ -72,6 +72,7 @@ export type LocalizedContent = {
   contactHeading: string;
   contactDescription: string;
   contactEmail: string;
+  contactPhone: string;
   githubUrl: string;
   linkedinUrl: string;
 };
@@ -253,6 +254,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     contactDescription:
       "I'm actively looking for a team where I can contribute from day one — whether that's building APIs, maintaining systems, or shipping features end-to-end. Feel free to reach out via email or connect on LinkedIn.",
     contactEmail: "khangbao3008@gmail.com",
+    contactPhone: "0865399254",
     githubUrl: "https://github.com/Khang1z2t",
     linkedinUrl: "https://www.linkedin.com/in/yunok/",
   },
@@ -394,6 +396,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     contactDescription:
       "Mình sẵn sàng đóng góp từ ngày đầu — dù là xây API, bảo trì hệ thống, hay ship tính năng end-to-end. Liên hệ qua email hoặc kết nối trên LinkedIn nhé.",
     contactEmail: "khangbao3008@gmail.com",
+    contactPhone: "0865399254",
     githubUrl: "https://github.com/Khang1z2t",
     linkedinUrl: "https://www.linkedin.com/in/yunok/",
   },

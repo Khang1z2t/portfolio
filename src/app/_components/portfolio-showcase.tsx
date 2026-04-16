@@ -505,6 +505,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             <a href={`mailto:${current.contactEmail}`}>
               {current.contactEmail}
             </a>
+            <a href={`tel:+84${current.contactPhone.replace(/^0/, "")}`}>
+              {current.contactPhone}
+            </a>
             <a href={current.githubUrl} target="_blank" rel="noreferrer">
               {current.labels.githubProfile}
             </a>
