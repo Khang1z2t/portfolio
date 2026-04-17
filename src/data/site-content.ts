@@ -40,6 +40,11 @@ export type LocalizedContent = {
     livePreview: string;
     githubProfile: string;
     connectWithMe: string;
+    viewCv: string;
+    downloadCv: string;
+    close: string;
+    cvTitle: string;
+    cvMissing: string;
   };
   hero: {
     eyebrow: string;
@@ -128,6 +133,12 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       livePreview: "Live preview",
       githubProfile: "GitHub profile",
       connectWithMe: "Connect with me",
+      viewCv: "View CV",
+      downloadCv: "Download CV",
+      close: "Close",
+      cvTitle: "Curriculum Vitae",
+      cvMissing:
+        "Add your CV file to public/resume/*.pdf and it will appear here automatically.",
     },
     hero: {
       eyebrow: "Fullstack developer — Java, Spring Boot, ReactJS",
@@ -279,6 +290,12 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       livePreview: "Xem bản chạy",
       githubProfile: "Trang GitHub",
       connectWithMe: "Kết nối với tôi",
+      viewCv: "Xem CV",
+      downloadCv: "Tải CV",
+      close: "Đóng",
+      cvTitle: "Sơ yếu lý lịch",
+      cvMissing:
+        "Chỉ cần thêm file CV của bạn vào public/resume/*.pdf là phần này sẽ hiển thị ngay.",
     },
     hero: {
       eyebrow: "Lập trình viên Fullstack — Java, Spring Boot, ReactJS",

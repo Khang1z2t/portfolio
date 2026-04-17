@@ -1,10 +1,16 @@
 "use client";
 
 import { useGSAP } from "@gsap/react";
-import { ArrowUpIcon, ChevronDownIcon } from "@radix-ui/react-icons";
+import {
+  ArrowUpIcon,
+  ChevronDownIcon,
+  Cross2Icon,
+  DownloadIcon,
+} from "@radix-ui/react-icons";
 import * as Select from "@radix-ui/react-select";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import dynamic from "next/dynamic";
 import { startTransition, useEffect, useRef, useState } from "react";
 import {
   type Locale,
@@ -13,6 +19,14 @@ import {
 } from "@/data/portfolio";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+const CvPdfViewer = dynamic(
+  () =>
+    import("@/app/_components/cv-pdf-viewer").then((mod) => mod.CvPdfViewer),
+  {
+    ssr: false,
+  },
+);
 
 type PortfolioShowcaseProps = {
   content: Record<Locale, LocalizedContent>;
@@ -23,11 +37,14 @@ const localeOptions: Array<{ label: string; value: Locale }> = [
   { label: "VI", value: "vi" },
 ];
 const localeStorageKey = "portfolio-locale";
+const cvPath = "/resume/cv.pdf";
+const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullYear()}.pdf`;
 
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const root = useRef<HTMLElement | null>(null);
   const [locale, setLocale] = useState<Locale>("en");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isCvOpen, setIsCvOpen] = useState(false);
   const current = content[locale];
 
   useEffect(() => {
@@ -40,6 +57,27 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   useEffect(() => {
     window.localStorage.setItem(localeStorageKey, locale);
   }, [locale]);
+
+  useEffect(() => {
+    if (!isCvOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsCvOpen(false);
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isCvOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -227,6 +265,19 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
 
+  const handleDownload = async () => {
+    const response = await fetch(cvPath);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = cvDownloadName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <main className="portfolio-shell" ref={root}>
       <section className="hero-section js-hero" id="home">
@@ -328,6 +379,15 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
               <a className="button-secondary" href="#skills">
                 {current.hero.secondaryAction}
               </a>
+              <button
+                className="button-secondary button-secondary-quiet"
+                onClick={() => {
+                  setIsCvOpen(true);
+                }}
+                type="button"
+              >
+                {current.labels.viewCv}
+              </button>
             </div>
 
             <div className="hero-note js-hero-meta">
@@ -528,6 +588,68 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       >
         <ArrowUpIcon />
       </button>
+
+      {isCvOpen ? (
+        <div
+          aria-hidden="true"
+          className="cv-modal-overlay"
+          onClick={() => {
+            setIsCvOpen(false);
+          }}
+        >
+          <div
+            aria-label={current.labels.cvTitle}
+            aria-modal="true"
+            className="cv-modal"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === " " || event.key === "Enter") {
+                event.stopPropagation();
+              }
+            }}
+            role="dialog"
+            tabIndex={-1}
+          >
+            <div className="cv-modal-header">
+              <div>
+                <p className="cv-modal-eyebrow">{current.labels.viewCv}</p>
+                <h3>{current.labels.cvTitle}</h3>
+              </div>
+
+              <button
+                aria-label={current.labels.close}
+                className="cv-close-button"
+                onClick={() => {
+                  setIsCvOpen(false);
+                }}
+                type="button"
+              >
+                <Cross2Icon />
+              </button>
+            </div>
+
+            <div className="cv-modal-body">
+              <CvPdfViewer
+                fileUrl={cvPath}
+                missingLabel={current.labels.cvMissing}
+              />
+            </div>
+
+            <div className="cv-modal-footer">
+              <button
+                className="cv-download-button"
+                onClick={handleDownload}
+                type="button"
+              >
+                <DownloadIcon />
+                <span>{current.labels.downloadCv}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
