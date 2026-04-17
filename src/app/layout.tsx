@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { sharedSkillItems } from "@/data/portfolio";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const flattenedSkills = Array.from(new Set(sharedSkillItems.flat()));
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -73,7 +74,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
