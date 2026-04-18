@@ -42,6 +42,7 @@ const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullY
 
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const root = useRef<HTMLElement | null>(null);
+  const eyebrowTextRef = useRef<HTMLSpanElement | null>(null);
   const [locale, setLocale] = useState<Locale>("en");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isCvOpen, setIsCvOpen] = useState(false);
@@ -222,6 +223,93 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
   useGSAP(
     () => {
+      const eyebrowNode = eyebrowTextRef.current;
+      const eyebrowStates = current.hero.eyebrowStates?.length
+        ? current.hero.eyebrowStates
+        : [current.hero.eyebrow];
+
+      if (!eyebrowNode || eyebrowStates.length <= 1) {
+        if (eyebrowNode) {
+          eyebrowNode.textContent = eyebrowStates[0] ?? current.hero.eyebrow;
+        }
+        return;
+      }
+
+      const glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+-/<>?=~";
+      let eyebrowIndex = 0;
+
+      const setScrambledText = (targetText: string, progress: number) => {
+        const revealCount = Math.floor(targetText.length * progress);
+        const nextText = targetText
+          .split("")
+          .map((char, index) => {
+            if (char === " " || char === "—" || char === "," || char === ".") {
+              return char;
+            }
+
+            if (index < revealCount) {
+              return targetText[index];
+            }
+
+            return glyphs[Math.floor(Math.random() * glyphs.length)];
+          })
+          .join("");
+
+        eyebrowNode.textContent = nextText;
+      };
+
+      eyebrowNode.textContent = eyebrowStates[0];
+      gsap.set(eyebrowNode, {
+        color: "#ffb074",
+        textShadow: "0 0 0 rgba(0, 0, 0, 0)",
+      });
+
+      const eyebrowTimeline = gsap.timeline({
+        repeat: -1,
+        repeatDelay: 0.72,
+      });
+
+      eyebrowStates.forEach((_state, stateIndex) => {
+        eyebrowTimeline
+          .to(
+            eyebrowNode,
+            {
+              autoAlpha: 0.74,
+              duration: 0.08,
+              ease: "power1.out",
+            },
+            stateIndex === 0 ? "+=2.6" : "+=2.95",
+          )
+          .to(eyebrowNode, {
+            duration: 0.08,
+            ease: "power1.out",
+            textShadow:
+              "-1px 0 rgba(255, 122, 26, 0.72), 1px 0 rgba(102, 216, 255, 0.68), 0 0 8px rgba(255, 122, 26, 0.08)",
+          })
+          .to(eyebrowNode, {
+            duration: 0.46,
+            ease: "none",
+            onStart: () => {
+              eyebrowIndex = (eyebrowIndex + 1) % eyebrowStates.length;
+            },
+            onUpdate: function onUpdate() {
+              setScrambledText(eyebrowStates[eyebrowIndex], this.progress());
+            },
+          })
+          .to(eyebrowNode, {
+            autoAlpha: 1,
+            duration: 0.12,
+            ease: "power2.out",
+            textShadow:
+              "0 0 0 rgba(255, 122, 26, 0), 0 0 0 rgba(102, 216, 255, 0)",
+          });
+      });
+    },
+    { dependencies: [locale], revertOnUpdate: true, scope: root },
+  );
+
+  useGSAP(
+    () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         ScrollTrigger.refresh();
         return;
@@ -344,7 +432,11 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
         <div className="hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow js-hero-meta">{current.hero.eyebrow}</p>
+            <p className="eyebrow js-hero-meta">
+              <span className="js-eyebrow-text" ref={eyebrowTextRef}>
+                {current.hero.eyebrowStates?.[0] ?? current.hero.eyebrow}
+              </span>
+            </p>
 
             <div className="hero-heading" key={`${locale}-heading`}>
               {current.hero.headingWords.map((word) => (

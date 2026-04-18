@@ -270,6 +270,15 @@ a {
   text-transform: uppercase;
 }
 
+.js-eyebrow-text {
+  display: inline-block;
+  min-height: 1.5em;
+  will-change: opacity, transform, color, text-shadow;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  backface-visibility: hidden;
+}
+
 .hero-heading,
 .section-heading h2,
 .project-body h3,

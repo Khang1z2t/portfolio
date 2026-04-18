@@ -48,6 +48,7 @@ export type LocalizedContent = {
   };
   hero: {
     eyebrow: string;
+    eyebrowStates?: string[];
     headingWords: string[];
     animatedWords: string[];
     summary: string;
@@ -142,6 +143,11 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     },
     hero: {
       eyebrow: "Fullstack developer — Java, Spring Boot, ReactJS",
+      eyebrowStates: [
+        "Full-stack developer — Java, Spring Boot, ReactJS",
+        "Backend developer — Java, C#, Node.js",
+        "Frontend developer — Next.js, TypeScript, Tailwind",
+      ],
       headingWords: [
         "I'm",
         "Khang.",
@@ -299,6 +305,11 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     },
     hero: {
       eyebrow: "Lập trình viên Fullstack — Java, Spring Boot, ReactJS",
+      eyebrowStates: [
+        "Lập trình Full-stack — Java, Spring Boot, ReactJS",
+        "Lập trình Backend — Java, C#, Node.js",
+        "Lập trình Frontend — Next.js, TypeScript, Tailwind",
+      ],
       headingWords: ["Tôi", "là", "Khang.", "Code", "thật,", "deploy", "thật."],
       animatedWords: [
         "fullstack",
