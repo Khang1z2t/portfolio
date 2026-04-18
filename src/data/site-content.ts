@@ -19,9 +19,15 @@ export type LocalizedPipelineStep = {
   description: string;
 };
 
+export type LocalizedAboutFact = {
+  label: string;
+  value: string;
+};
+
 export type LocalizedContent = {
   brand: string;
   nav: {
+    about: string;
     work: string;
     skills: string;
     pipeline: string;
@@ -40,6 +46,13 @@ export type LocalizedContent = {
     livePreview: string;
     githubProfile: string;
     connectWithMe: string;
+    connect: string;
+    connectSheet: string;
+    facebook: string;
+    github: string;
+    linkedin: string;
+    phone: string;
+    zalo: string;
     viewCv: string;
     downloadCv: string;
     close: string;
@@ -55,6 +68,12 @@ export type LocalizedContent = {
     primaryAction: string;
     secondaryAction: string;
     notes: string[];
+  };
+  about: {
+    eyebrow: string;
+    heading: string;
+    description: string;
+    facts: LocalizedAboutFact[];
   };
   panel: {
     captionLeft: string;
@@ -79,6 +98,7 @@ export type LocalizedContent = {
   contactDescription: string;
   contactEmail: string;
   contactPhone: string;
+  facebookUrl?: string;
   githubUrl: string;
   linkedinUrl: string;
 };
@@ -116,6 +136,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
   en: {
     brand: "KHANG",
     nav: {
+      about: "About",
       work: "Work",
       skills: "Skills",
       pipeline: "How I work",
@@ -134,6 +155,13 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       livePreview: "Live preview",
       githubProfile: "GitHub profile",
       connectWithMe: "Connect with me",
+      connect: "Connect",
+      connectSheet: "Find me",
+      facebook: "Facebook",
+      github: "GitHub",
+      linkedin: "LinkedIn",
+      phone: "Phone",
+      zalo: "Zalo",
       viewCv: "View CV",
       downloadCv: "Download CV",
       close: "Close",
@@ -173,6 +201,21 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         "Production experience from real enterprise and banking environments.",
       ],
     },
+    about: {
+      eyebrow: "About me",
+      heading: "I'm Dinh Quoc Bao Khang",
+      description:
+        "I'm a full-stack developer based in Ho Chi Minh City, with a strong focus on backend systems, API design, and building practical products end-to-end. I enjoy working on software that is secure, stable, and useful in real production environments.",
+      facts: [
+        { label: "Location", value: "Ho Chi Minh City, Vietnam" },
+        { label: "Experience", value: "1+ year" },
+        {
+          label: "Focus",
+          value: "Backend systems, API design, and full-stack delivery",
+        },
+        { label: "Availability", value: "Full-time or remote" },
+      ],
+    },
     panel: {
       captionLeft: "Developer signal",
       captionRight: "Bilingual / fullstack framing",
@@ -181,7 +224,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         "Java Spring Boot + ReactJS, deployed with Docker and CI/CD",
       secondaryLabel: "Current focus",
       secondaryValue:
-        "Backend systems, API design, and shipping stable full-stack products",
+        "Backend systems, API design, and delivering stable full-stack products",
     },
     capabilities: [
       "Fullstack portfolio framing — backend-leaning, not just UI",
@@ -272,12 +315,14 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       "I'm actively looking for a team where I can contribute from day one — whether that's building APIs, maintaining systems, or shipping features end-to-end. Feel free to reach out via email or connect on LinkedIn.",
     contactEmail: "khangbao3008@gmail.com",
     contactPhone: "0865399254",
+    facebookUrl: "https://www.facebook.com/Yuno1z2t/",
     githubUrl: "https://github.com/Khang1z2t",
     linkedinUrl: "https://www.linkedin.com/in/yunok/",
   },
   vi: {
     brand: "KHANG",
     nav: {
+      about: "Về mình",
       work: "Dự án",
       skills: "Kỹ năng",
       pipeline: "Cách tôi làm việc",
@@ -296,6 +341,13 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       livePreview: "Xem bản chạy",
       githubProfile: "Trang GitHub",
       connectWithMe: "Kết nối với tôi",
+      connect: "Kết nối",
+      connectSheet: "Tìm tôi",
+      facebook: "Facebook",
+      github: "GitHub",
+      linkedin: "LinkedIn",
+      phone: "Số điện thoại",
+      zalo: "Zalo",
       viewCv: "Xem CV",
       downloadCv: "Tải CV",
       close: "Đóng",
@@ -327,6 +379,24 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         "Có kinh nghiệm production trong môi trường enterprise và banking thực tế.",
       ],
     },
+    about: {
+      eyebrow: "Về mình",
+      heading: "Mình là Dinh Quoc Bao Khang",
+      description:
+        "Mình là lập trình viên full-stack tại TP. Hồ Chí Minh, tập trung mạnh vào backend, thiết kế API và xây dựng sản phẩm có thể triển khai thực tế từ đầu đến cuối. Mình thích làm những hệ thống ổn định, bảo mật và thực sự hữu ích trong môi trường production.",
+      facts: [
+        { label: "Địa điểm", value: "TP. Hồ Chí Minh, Việt Nam" },
+        { label: "Kinh nghiệm", value: "1+ năm" },
+        {
+          label: "Trọng tâm",
+          value: "Hệ thống backend, thiết kế API và triển khai full-stack",
+        },
+        {
+          label: "Sẵn sàng",
+          value: "Full-time hoặc remote",
+        },
+      ],
+    },
     panel: {
       captionLeft: "Dấu ấn developer",
       captionRight: "Song ngữ / định vị fullstack",
@@ -334,7 +404,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       primaryValue: "Java Spring Boot + ReactJS, deploy bằng Docker và CI/CD",
       secondaryLabel: "Trọng tâm hiện tại",
       secondaryValue:
-        "Hệ thống backend, thiết kế API và ship sản phẩm full-stack ổn định",
+        "Hệ thống backend, thiết kế API và xây dựng và triển khai sản phẩm full-stack ổn định",
     },
     capabilities: [
       "Định vị portfolio theo hướng fullstack thiên backend, không chỉ là UI",
@@ -374,7 +444,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       },
     ],
     skillsHeading:
-      "Bộ kỹ năng xây quanh sự ổn định backend và khả năng ship fullstack.",
+      "Tư duy backend làm gốc, kỹ năng fullstack làm đầu ra.",
     skillGroups: [
       { title: "Ngôn ngữ" },
       { title: "Frontend" },
@@ -411,7 +481,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
           "Xử lý edge case, tăng độ ổn định và hoàn thiện trải nghiệm cuối để sản phẩm đủ tốt cho việc triển khai và bảo trì.",
       },
     ],
-    engineeringHeading: "Tư duy backend-first, ship được fullstack.",
+    engineeringHeading: "Tư duy backend-first, làm chủ toàn bộ fullstack.",
     engineeringDescription:
       "Mình tập trung vào phần làm cho phần mềm thực sự chạy được — luồng xác thực bảo mật, API ổn định, và pipeline deploy không gãy. Frontend là để phục vụ trải nghiệm và mục tiêu sản phẩm, không phải ngược lại.",
     engineeringPoints: [
@@ -425,6 +495,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       "Mình sẵn sàng đóng góp từ ngày đầu — dù là xây API, bảo trì hệ thống, hay ship tính năng end-to-end. Liên hệ qua email hoặc kết nối trên LinkedIn nhé.",
     contactEmail: "khangbao3008@gmail.com",
     contactPhone: "0865399254",
+    facebookUrl: "https://www.facebook.com/Yuno1z2t/",
     githubUrl: "https://github.com/Khang1z2t",
     linkedinUrl: "https://www.linkedin.com/in/yunok/",
   },

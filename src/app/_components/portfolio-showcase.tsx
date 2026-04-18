@@ -7,11 +7,15 @@ import {
   Cross2Icon,
   DownloadIcon,
 } from "@radix-ui/react-icons";
+import * as Popover from "@radix-ui/react-popover";
 import * as Select from "@radix-ui/react-select";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { startTransition, useEffect, useRef, useState } from "react";
+import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa6";
+import { FiChevronDown, FiMail, FiPhone, FiUser } from "react-icons/fi";
+import { SiZalo } from "react-icons/si";
 import {
   type Locale,
   type LocalizedContent,
@@ -47,6 +51,53 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isCvOpen, setIsCvOpen] = useState(false);
   const current = content[locale];
+  const footerYear = new Date().getFullYear();
+  const contactPhoneHref = `tel:+84${current.contactPhone.replace(/^0/, "")}`;
+  const zaloUrl = `https://zalo.me/${current.contactPhone}`;
+  const connectLinks = [
+    {
+      key: "email",
+      label: current.contactEmail,
+      href: `mailto:${current.contactEmail}`,
+      icon: <FiMail />,
+      external: false,
+    },
+    {
+      key: "facebook",
+      label: current.labels.facebook,
+      href: current.facebookUrl,
+      icon: <FaFacebookF />,
+      external: true,
+    },
+    {
+      key: "github",
+      label: current.labels.github,
+      href: current.githubUrl,
+      icon: <FaGithub />,
+      external: true,
+    },
+    {
+      key: "linkedin",
+      label: current.labels.linkedin,
+      href: current.linkedinUrl,
+      icon: <FaLinkedinIn />,
+      external: true,
+    },
+    {
+      key: "phone",
+      label: current.labels.phone,
+      href: contactPhoneHref,
+      icon: <FiPhone />,
+      external: false,
+    },
+    {
+      key: "zalo",
+      label: current.labels.zalo,
+      href: zaloUrl,
+      icon: <SiZalo />,
+      external: true,
+    },
+  ];
 
   useEffect(() => {
     const storedLocale = window.localStorage.getItem(localeStorageKey);
@@ -106,11 +157,22 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
         },
       });
 
+      // Intro experiment is intentionally disabled for now.
+      // heroTimeline.from(".js-intro-reveal", {
+      //   y: 28,
+      //   autoAlpha: 0,
+      //   stagger: 0.12,
+      //   duration: 0.85,
+      // });
       heroTimeline
-        .from(".js-topbar", {
-          y: -24,
-          autoAlpha: 0,
-        })
+        .from(
+          ".js-topbar",
+          {
+            y: -24,
+            autoAlpha: 0,
+          },
+          "-=0.35",
+        )
         .from(
           ".js-hero-meta",
           {
@@ -368,6 +430,25 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
   return (
     <main className="portfolio-shell" ref={root}>
+      {/*
+        Intro overlay experiment is paused for now.
+        Keeping the markup here makes it easy to re-enable later without rebuilding it.
+      <section className="intro-section js-intro" id="top">
+        <div className="intro-orb intro-orb-left" />
+        <div className="intro-orb intro-orb-right" />
+        <div className="intro-grid-overlay" />
+
+        <div className="intro-copy js-intro-copy">
+          <p className="intro-kicker js-intro-reveal">{current.brand}</p>
+          <h1 className="intro-title js-intro-reveal">{intro.title}</h1>
+          <button className="intro-scroll js-intro-reveal" type="button">
+            <span>{intro.action}</span>
+            <ChevronDownIcon />
+          </button>
+        </div>
+      </section>
+      */}
+
       <section className="hero-section js-hero" id="home">
         <div className="hero-glow hero-glow-left" />
         <div className="hero-glow hero-glow-right" />
@@ -380,6 +461,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
           <div className="topbar-actions">
             <nav aria-label="Primary" className="topnav">
+              <a href="#about">{current.nav.about}</a>
               <a href="#work">{current.nav.work}</a>
               <a href="#skills">{current.nav.skills}</a>
               <a href="#pipeline">{current.nav.pipeline}</a>
@@ -512,6 +594,100 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
                 <span>{current.panel.secondaryLabel}</span>
                 <strong>{current.panel.secondaryValue}</strong>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section about-section js-section" id="about">
+        <div className="about-grid">
+          <div className="about-copy">
+            <p className="eyebrow js-reveal">{current.about.eyebrow}</p>
+            <h2 className="about-heading js-reveal">{current.about.heading}</h2>
+            <p className="detail-copy js-reveal">{current.about.description}</p>
+          </div>
+
+          <div className="about-card js-reveal">
+            <div className="about-facts-grid">
+              {current.about.facts.map((fact) => (
+                <div className="about-fact" key={fact.label}>
+                  <p>{fact.label}</p>
+                  <strong>{fact.value}</strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="about-actions">
+              <Popover.Root>
+                <Popover.Trigger
+                  aria-label={current.labels.connectSheet}
+                  className="button-secondary connect-trigger connect-trigger-compact"
+                >
+                  <span className="connect-trigger-leading">
+                    <FiUser />
+                  </span>
+                  <span className="connect-trigger-label">
+                    {current.labels.connect}
+                  </span>
+                  <span className="connect-trigger-icon">
+                    <FiChevronDown />
+                  </span>
+                </Popover.Trigger>
+
+                <Popover.Portal>
+                  <Popover.Content
+                    align="start"
+                    avoidCollisions
+                    className="connect-content"
+                    collisionPadding={16}
+                    sideOffset={10}
+                  >
+                    <div className="connect-title">
+                      {current.labels.connectSheet}
+                    </div>
+
+                    <div className="connect-viewport">
+                      {connectLinks.map((item) =>
+                        item.href ? (
+                          <a
+                            className="connect-item"
+                            href={item.href}
+                            key={item.key}
+                            rel={item.external ? "noreferrer" : undefined}
+                            target={item.external ? "_blank" : undefined}
+                          >
+                            <span className="connect-icon">{item.icon}</span>
+                            <span>{item.label}</span>
+                          </a>
+                        ) : (
+                          <span
+                            aria-disabled="true"
+                            className="connect-item is-disabled"
+                            key={item.key}
+                          >
+                            <span className="connect-icon">{item.icon}</span>
+                            <span>{item.label}</span>
+                          </span>
+                        ),
+                      )}
+                    </div>
+
+                    <Popover.Arrow className="connect-arrow" />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+
+              <a
+                className="button-secondary connect-trigger-compact"
+                href="#contact"
+              >
+                <span className="connect-trigger-leading">
+                  <FiMail />
+                </span>
+                <span className="connect-trigger-label">
+                  {current.nav.contact}
+                </span>
+              </a>
             </div>
           </div>
         </div>
@@ -657,9 +833,6 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             <a href={`mailto:${current.contactEmail}`}>
               {current.contactEmail}
             </a>
-            <a href={`tel:+84${current.contactPhone.replace(/^0/, "")}`}>
-              {current.contactPhone}
-            </a>
             <a href={current.githubUrl} target="_blank" rel="noreferrer">
               {current.labels.githubProfile}
             </a>
@@ -669,6 +842,10 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           </div>
         </div>
       </section>
+
+      <footer className="portfolio-footer">
+        <p>© Dinh Quoc Bao Khang {footerYear}. All rights reserved.</p>
+      </footer>
 
       <button
         aria-label="Scroll to top"
