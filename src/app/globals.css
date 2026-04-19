@@ -207,6 +207,29 @@ a {
   padding: 1.5rem;
 }
 
+.topbar-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 24;
+  padding: 1rem 1.5rem 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  visibility: hidden;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    visibility 220ms ease;
+}
+
+.topbar-shell.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
 .hero-glow {
   position: absolute;
   border-radius: 9999px;
@@ -249,6 +272,38 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(244, 239, 230, 0.08);
+  border-radius: 9999px;
+  background: rgba(8, 10, 15, 0.72);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  pointer-events: auto;
+}
+
+.topbar--hero {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.topbar--sticky {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(244, 239, 230, 0.08);
+  border-radius: 9999px;
+  background: rgba(8, 10, 15, 0.58);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.hero-section[id],
+.content-section[id] {
+  scroll-margin-top: 2rem;
 }
 
 .topbar-actions {
@@ -281,6 +336,14 @@ a {
 .topnav a:hover {
   color: var(--foreground);
   transform: translateY(-1px);
+}
+
+.topnav .nav-label-desktop {
+  display: inline;
+}
+
+.topnav .nav-label-mobile {
+  display: none;
 }
 
 .locale-picker {
@@ -341,6 +404,7 @@ a {
   background: rgba(10, 13, 19, 0.96);
   backdrop-filter: blur(18px);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+  z-index: 60;
 }
 
 .locale-viewport {
@@ -386,7 +450,7 @@ a {
   width: min(1240px, 100%);
   min-height: calc(100svh - 4rem);
   margin: 0 auto;
-  padding: 3.75rem 0 2rem;
+  padding: 3rem 0 2rem;
 }
 
 .hero-copy {
@@ -1574,6 +1638,10 @@ a {
     padding: 2rem;
   }
 
+  .topbar-shell {
+    padding: 1.1rem 2rem 0;
+  }
+
   .about-grid {
     grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
     align-items: start;
@@ -1636,27 +1704,103 @@ a {
 }
 
 @media (max-width: 767px) {
-  .topbar {
-    flex-direction: column;
-    align-items: flex-start;
+  .hero-section[id],
+  .content-section[id] {
+    scroll-margin-top: 4.15rem;
+  }
+
+  .topbar--hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem 0.85rem;
   }
 
   .intro-title {
     max-width: 8.5ch;
   }
 
-  .topbar-actions {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
+  .topbar-shell {
+    top: 0.35rem;
+    padding: 0 0.75rem;
   }
 
-  .locale-picker {
-    align-self: flex-start;
+  .topbar--hero .brand-mark {
+    font-size: 0.82rem;
+    letter-spacing: 0.24em;
+  }
+
+  .topbar--hero .topbar-actions,
+  .topbar--sticky .topbar-actions {
+    display: contents;
+  }
+
+  .topbar--sticky {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.65rem 0.8rem;
+    padding: 0.72rem 0.82rem;
+    border-radius: 1rem;
+  }
+
+  .topbar--sticky .brand-mark {
+    font-size: 0.82rem;
+    letter-spacing: 0.22em;
+  }
+
+  .topbar--hero .topnav,
+  .topbar--sticky .topnav {
+    grid-column: 1 / -1;
+    flex-wrap: nowrap;
+    gap: 0.85rem;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    font-size: 0.8rem;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    padding-bottom: 0.08rem;
+  }
+
+  .topbar--hero .topnav::-webkit-scrollbar,
+  .topbar--sticky .topnav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .topbar--hero .locale-picker,
+  .topbar--sticky .locale-picker {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .topbar--hero .locale-trigger,
+  .topbar--sticky .locale-trigger {
+    min-width: 3.55rem;
+    min-height: 2.05rem;
+    padding: 0.34rem 0.62rem;
+    font-size: 0.74rem;
+  }
+
+  .topbar--hero .topnav a,
+  .topbar--sticky .topnav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.9rem;
+  }
+
+  .topnav .nav-label-desktop {
+    display: none;
+  }
+
+  .topnav .nav-label-mobile {
+    display: inline;
   }
 
   .hero-grid {
-    padding-top: 4.5rem;
+    padding-top: 2.1rem;
   }
 
   .connect-content {

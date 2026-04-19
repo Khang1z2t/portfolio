@@ -28,11 +28,17 @@ export type LocalizedContent = {
   brand: string;
   nav: {
     about: string;
+    aboutShort?: string;
     work: string;
+    workShort?: string;
     skills: string;
+    skillsShort?: string;
     pipeline: string;
+    pipelineShort?: string;
     engineering: string;
+    engineeringShort?: string;
     contact: string;
+    contactShort?: string;
   };
   labels: {
     language: string;
@@ -323,11 +329,17 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     brand: "KHANG",
     nav: {
       about: "Về mình",
+      aboutShort: "Về",
       work: "Dự án",
+      workShort: "Dự án",
       skills: "Kỹ năng",
+      skillsShort: "Kỹ năng",
       pipeline: "Cách tôi làm việc",
+      pipelineShort: "Quy trình",
       engineering: "Chuyên môn",
+      engineeringShort: "Chuyên môn",
       contact: "Liên hệ",
+      contactShort: "Liên hệ",
     },
     labels: {
       language: "Ngôn ngữ",
@@ -443,8 +455,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
           "Tiếp xúc với hệ thống tài chính thực tế yêu cầu cao. Áp dụng quy trình bảo mật doanh nghiệp cùng senior developer và đội QA trong môi trường banking được kiểm soát chặt.",
       },
     ],
-    skillsHeading:
-      "Tư duy backend làm gốc, kỹ năng fullstack làm đầu ra.",
+    skillsHeading: "Tư duy backend làm gốc, kỹ năng fullstack làm đầu ra.",
     skillGroups: [
       { title: "Ngôn ngữ" },
       { title: "Frontend" },

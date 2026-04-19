@@ -46,9 +46,11 @@ const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullY
 
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const root = useRef<HTMLElement | null>(null);
+  const heroCopyRef = useRef<HTMLDivElement | null>(null);
   const eyebrowTextRef = useRef<HTMLSpanElement | null>(null);
   const [locale, setLocale] = useState<Locale>("en");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [isCvOpen, setIsCvOpen] = useState(false);
   const current = content[locale];
   const footerYear = new Date().getFullYear();
@@ -134,6 +136,14 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 280);
+
+      const aboutSection = document.getElementById("about");
+      if (!aboutSection) {
+        setShowStickyHeader(false);
+        return;
+      }
+
+      setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
     };
 
     handleScroll();
@@ -280,11 +290,12 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
         },
       });
     },
-    { scope: root },
+    { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
 
   useGSAP(
     () => {
+      const heroCopyNode = heroCopyRef.current;
       const eyebrowNode = eyebrowTextRef.current;
       const eyebrowStates = current.hero.eyebrowStates?.length
         ? current.hero.eyebrowStates
@@ -366,6 +377,17 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
               "0 0 0 rgba(255, 122, 26, 0), 0 0 0 rgba(102, 216, 255, 0)",
           });
       });
+
+      if (heroCopyNode) {
+        ScrollTrigger.create({
+          trigger: heroCopyNode,
+          start: "top bottom",
+          end: "bottom top",
+          onToggle: (self) => {
+            eyebrowTimeline.paused(!self.isActive);
+          },
+        });
+      }
     },
     { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
@@ -377,6 +399,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
         return;
       }
 
+      const heroCopyNode = heroCopyRef.current;
       const words = gsap.utils.toArray<HTMLElement>(".js-rotating-word");
       gsap.set(words, {
         autoAlpha: 0,
@@ -408,6 +431,17 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           );
       });
 
+      if (heroCopyNode) {
+        ScrollTrigger.create({
+          trigger: heroCopyNode,
+          start: "top bottom",
+          end: "bottom top",
+          onToggle: (self) => {
+            wordTimeline.paused(!self.isActive);
+          },
+        });
+      }
+
       requestAnimationFrame(() => {
         ScrollTrigger.refresh();
       });
@@ -427,6 +461,98 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
     URL.revokeObjectURL(url);
   };
+
+  const renderTopbar = (mode: "hero" | "sticky") => (
+    <header
+      className={`topbar ${mode === "hero" ? "topbar--hero" : "topbar--sticky"} ${mode === "sticky" ? "js-topbar" : ""}`}
+    >
+      <a className="brand-mark" href="#home">
+        {current.brand}
+      </a>
+
+      <div className="topbar-actions">
+        <nav aria-label="Primary" className="topnav">
+          <a href="#about">
+            <span className="nav-label-desktop">{current.nav.about}</span>
+            <span className="nav-label-mobile">
+              {current.nav.aboutShort ?? current.nav.about}
+            </span>
+          </a>
+          <a href="#work">
+            <span className="nav-label-desktop">{current.nav.work}</span>
+            <span className="nav-label-mobile">
+              {current.nav.workShort ?? current.nav.work}
+            </span>
+          </a>
+          <a href="#skills">
+            <span className="nav-label-desktop">{current.nav.skills}</span>
+            <span className="nav-label-mobile">
+              {current.nav.skillsShort ?? current.nav.skills}
+            </span>
+          </a>
+          <a href="#pipeline">
+            <span className="nav-label-desktop">{current.nav.pipeline}</span>
+            <span className="nav-label-mobile">
+              {current.nav.pipelineShort ?? current.nav.pipeline}
+            </span>
+          </a>
+          <a href="#engineering">
+            <span className="nav-label-desktop">{current.nav.engineering}</span>
+            <span className="nav-label-mobile">
+              {current.nav.engineeringShort ?? current.nav.engineering}
+            </span>
+          </a>
+          <a href="#contact">
+            <span className="nav-label-desktop">{current.nav.contact}</span>
+            <span className="nav-label-mobile">
+              {current.nav.contactShort ?? current.nav.contact}
+            </span>
+          </a>
+        </nav>
+
+        <div className="locale-picker">
+          <Select.Root
+            value={locale}
+            onValueChange={(value) => {
+              startTransition(() => {
+                setLocale(value as Locale);
+              });
+            }}
+          >
+            <Select.Trigger
+              className="locale-trigger"
+              aria-label={current.labels.language}
+            >
+              <Select.Value />
+              <Select.Icon className="locale-trigger-icon">
+                <ChevronDownIcon />
+              </Select.Icon>
+            </Select.Trigger>
+
+            <Select.Portal>
+              <Select.Content
+                className="locale-content"
+                position="popper"
+                sideOffset={10}
+              >
+                <Select.Viewport className="locale-viewport">
+                  {localeOptions.map((option) => (
+                    <Select.Item
+                      className="locale-item"
+                      key={option.value}
+                      value={option.value}
+                    >
+                      <Select.ItemText>{option.label}</Select.ItemText>
+                    </Select.Item>
+                  ))}
+                </Select.Viewport>
+              </Select.Content>
+            </Select.Portal>
+          </Select.Root>
+        </div>
+      </div>
+    </header>
+  );
 
   return (
     <main className="portfolio-shell" ref={root}>
@@ -449,71 +575,18 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       </section>
       */}
 
+      <div className={`topbar-shell ${showStickyHeader ? "is-visible" : ""}`}>
+        {renderTopbar("sticky")}
+      </div>
+
       <section className="hero-section js-hero" id="home">
         <div className="hero-glow hero-glow-left" />
         <div className="hero-glow hero-glow-right" />
         <div className="hero-noise" />
-
-        <header className="topbar js-topbar">
-          <a className="brand-mark" href="#home">
-            {current.brand}
-          </a>
-
-          <div className="topbar-actions">
-            <nav aria-label="Primary" className="topnav">
-              <a href="#about">{current.nav.about}</a>
-              <a href="#work">{current.nav.work}</a>
-              <a href="#skills">{current.nav.skills}</a>
-              <a href="#pipeline">{current.nav.pipeline}</a>
-              <a href="#engineering">{current.nav.engineering}</a>
-              <a href="#contact">{current.nav.contact}</a>
-            </nav>
-
-            <div className="locale-picker">
-              <Select.Root
-                value={locale}
-                onValueChange={(value) => {
-                  startTransition(() => {
-                    setLocale(value as Locale);
-                  });
-                }}
-              >
-                <Select.Trigger
-                  className="locale-trigger"
-                  aria-label={current.labels.language}
-                >
-                  <Select.Value />
-                  <Select.Icon className="locale-trigger-icon">
-                    <ChevronDownIcon />
-                  </Select.Icon>
-                </Select.Trigger>
-
-                <Select.Portal>
-                  <Select.Content
-                    className="locale-content"
-                    position="popper"
-                    sideOffset={10}
-                  >
-                    <Select.Viewport className="locale-viewport">
-                      {localeOptions.map((option) => (
-                        <Select.Item
-                          className="locale-item"
-                          key={option.value}
-                          value={option.value}
-                        >
-                          <Select.ItemText>{option.label}</Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
-            </div>
-          </div>
-        </header>
+        {renderTopbar("hero")}
 
         <div className="hero-grid">
-          <div className="hero-copy">
+          <div className="hero-copy" ref={heroCopyRef}>
             <p className="eyebrow js-hero-meta">
               <span className="js-eyebrow-text" ref={eyebrowTextRef}>
                 {current.hero.eyebrowStates?.[0] ?? current.hero.eyebrow}
