@@ -146,7 +146,9 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       work: "Work",
       skills: "Skills",
       pipeline: "How I work",
+      // pipelineShort: "Pipeline",
       engineering: "Engineering",
+      engineeringShort: "Mindset",
       contact: "Contact",
     },
     labels: {
