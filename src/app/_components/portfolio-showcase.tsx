@@ -12,7 +12,13 @@ import * as Select from "@radix-ui/react-select";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
-import { startTransition, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa6";
 import { FiChevronDown, FiMail, FiPhone, FiUser } from "react-icons/fi";
 import { SiZalo } from "react-icons/si";
@@ -44,6 +50,14 @@ const localeStorageKey = "portfolio-locale";
 const cvPath = "/resume/cv.pdf";
 const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullYear()}.pdf`;
 
+declare global {
+  interface Window {
+    __portfolioSafariDebug?: {
+      update: (message: string, extra?: string) => void;
+    };
+  }
+}
+
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const root = useRef<HTMLElement | null>(null);
   const heroCopyRef = useRef<HTMLDivElement | null>(null);
@@ -57,6 +71,16 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const isDebugSafari =
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).has("debugSafari");
+  const setDebugStage = useCallback(
+    (message: string, extra?: string) => {
+      if (!isDebugSafari || typeof window === "undefined") {
+        return;
+      }
+
+      window.__portfolioSafariDebug?.update(message, extra);
+    },
+    [isDebugSafari],
+  );
   const contactPhoneHref = `tel:+84${current.contactPhone.replace(/^0/, "")}`;
   const zaloUrl = `https://zalo.me/${current.contactPhone}`;
   const connectLinks = [
@@ -103,6 +127,10 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       external: true,
     },
   ];
+
+  useEffect(() => {
+    setDebugStage("react:mounted", locale);
+  }, [locale, setDebugStage]);
 
   useEffect(() => {
     if (!isDebugSafari) {
@@ -199,6 +227,10 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
 
       if (isDebugSafari) {
+        setDebugStage(
+          "scroll",
+          `${Math.round(window.scrollY)} / sticky:${window.scrollY >= aboutSection.offsetTop / 2 ? "1" : "0"}`,
+        );
         console.log("[safari-debug] scroll", {
           scrollY: window.scrollY,
           showScrollTop: window.scrollY > 280,
@@ -214,7 +246,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isDebugSafari]);
+  }, [isDebugSafari, setDebugStage]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -248,6 +280,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setDebugStage("gsap:skipped", "reduced-motion");
         return;
       }
 
@@ -388,6 +421,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       });
 
       if (isDebugSafari) {
+        setDebugStage("gsap:hero", "ok");
         console.log("[safari-debug] hero.gsap.init");
       }
     },
@@ -409,6 +443,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       if (!eyebrowNode || eyebrowStates.length <= 1) {
         if (eyebrowNode) {
           eyebrowNode.textContent = eyebrowStates[0] ?? current.hero.eyebrow;
+        }
+        if (isDebugSafari) {
+          setDebugStage("gsap:eyebrow", "static");
         }
         return;
       }
@@ -498,6 +535,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       }
 
       if (isDebugSafari) {
+        setDebugStage("gsap:eyebrow", String(eyebrowStates.length));
         console.log("[safari-debug] eyebrow.gsap.init", {
           states: eyebrowStates.length,
         });
@@ -514,6 +552,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         ScrollTrigger.refresh();
+        setDebugStage("gsap:words", "reduced-motion");
         return;
       }
 
@@ -568,6 +607,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       });
 
       if (isDebugSafari) {
+        setDebugStage("gsap:words", String(words.length));
         console.log("[safari-debug] words.gsap.init", { words: words.length });
       }
     },

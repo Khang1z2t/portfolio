@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { sharedSkillItems } from "@/data/portfolio";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
@@ -81,6 +82,72 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <Script id="safari-inline-debug" strategy="beforeInteractive">
+          {`
+              (function () {
+                try {
+                  var enabled = new URLSearchParams(window.location.search).has("debugSafari");
+                  if (!enabled) return;
+                  var badge = document.createElement("div");
+                  badge.id = "safari-debug-badge";
+                  badge.setAttribute("aria-live", "polite");
+                  badge.textContent = "inline:boot";
+                  badge.style.position = "fixed";
+                  badge.style.left = "12px";
+                  badge.style.bottom = "12px";
+                  badge.style.zIndex = "9999";
+                  badge.style.maxWidth = "min(82vw, 320px)";
+                  badge.style.padding = "8px 10px";
+                  badge.style.border = "1px solid rgba(255,255,255,0.14)";
+                  badge.style.borderRadius = "12px";
+                  badge.style.background = "rgba(8,10,15,0.92)";
+                  badge.style.color = "#f4efe6";
+                  badge.style.font = "600 12px/1.35 system-ui, sans-serif";
+                  badge.style.boxShadow = "0 12px 32px rgba(0,0,0,0.28)";
+                  document.addEventListener("DOMContentLoaded", function () {
+                    document.body.appendChild(badge);
+                  });
+                  window.__portfolioSafariDebug = {
+                    update: function (message, extra) {
+                      try {
+                        badge.textContent = extra ? message + " | " + extra : message;
+                        console.log("[safari-debug:inline] stage", { message: message, extra: extra });
+                      } catch (debugError) {
+                        console.error("[safari-debug:inline] badge.update.failed", debugError);
+                      }
+                    }
+                  };
+                  console.log("[safari-debug:inline] boot", {
+                    href: window.location.href,
+                    userAgent: navigator.userAgent,
+                    innerWidth: window.innerWidth,
+                    innerHeight: window.innerHeight,
+                    pixelRatio: window.devicePixelRatio
+                  });
+                  window.addEventListener("error", function (event) {
+                    if (window.__portfolioSafariDebug) {
+                      window.__portfolioSafariDebug.update("window.error", event.message || "unknown");
+                    }
+                    console.error("[safari-debug:inline] window.error", {
+                      message: event.message,
+                      filename: event.filename,
+                      lineno: event.lineno,
+                      colno: event.colno,
+                      error: event.error
+                    });
+                  });
+                  window.addEventListener("unhandledrejection", function (event) {
+                    if (window.__portfolioSafariDebug) {
+                      window.__portfolioSafariDebug.update("unhandledrejection");
+                    }
+                    console.error("[safari-debug:inline] unhandledrejection", event.reason);
+                  });
+                } catch (error) {
+                  console.error("[safari-debug:inline] bootstrap.failed", error);
+                }
+              })();
+            `}
+        </Script>
         {children}
         <Analytics />
       </body>
