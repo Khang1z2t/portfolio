@@ -54,6 +54,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [isCvOpen, setIsCvOpen] = useState(false);
   const current = content[locale];
   const footerYear = new Date().getFullYear();
+  const isDebugSafari =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("debugSafari");
   const contactPhoneHref = `tel:+84${current.contactPhone.replace(/^0/, "")}`;
   const zaloUrl = `https://zalo.me/${current.contactPhone}`;
   const connectLinks = [
@@ -102,6 +105,42 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   ];
 
   useEffect(() => {
+    if (!isDebugSafari) {
+      return;
+    }
+
+    const onError = (event: ErrorEvent) => {
+      console.error("[safari-debug] window.error", {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        error: event.error,
+      });
+    };
+
+    const onRejection = (event: PromiseRejectionEvent) => {
+      console.error("[safari-debug] unhandledrejection", event.reason);
+    };
+
+    console.log("[safari-debug] boot", {
+      locale,
+      userAgent: window.navigator.userAgent,
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      pixelRatio: window.devicePixelRatio,
+    });
+
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, [isDebugSafari, locale]);
+
+  useEffect(() => {
     try {
       const storedLocale = window.localStorage.getItem(localeStorageKey);
       if (storedLocale === "en" || storedLocale === "vi") {
@@ -109,16 +148,22 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       }
     } catch {
       // Safari or privacy mode can block storage access; keep default locale.
+      if (isDebugSafari) {
+        console.warn("[safari-debug] localStorage.read.failed");
+      }
     }
-  }, []);
+  }, [isDebugSafari]);
 
   useEffect(() => {
     try {
       window.localStorage.setItem(localeStorageKey, locale);
     } catch {
       // Ignore storage write failures so the rest of the client UI keeps working.
+      if (isDebugSafari) {
+        console.warn("[safari-debug] localStorage.write.failed", { locale });
+      }
     }
-  }, [locale]);
+  }, [isDebugSafari, locale]);
 
   useEffect(() => {
     if (!isCvOpen) {
@@ -152,6 +197,15 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       }
 
       setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
+
+      if (isDebugSafari) {
+        console.log("[safari-debug] scroll", {
+          scrollY: window.scrollY,
+          showScrollTop: window.scrollY > 280,
+          showStickyHeader: window.scrollY >= aboutSection.offsetTop / 2,
+          aboutOffsetTop: aboutSection.offsetTop,
+        });
+      }
     };
 
     handleScroll();
@@ -160,7 +214,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isDebugSafari]);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -172,16 +226,24 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       !/Chrome|CriOS|EdgiOS|FxiOS|OPiOS|DuckDuckGo/i.test(userAgent);
 
     if (!isAppleMobile || !isWebKitSafari) {
+      if (isDebugSafari) {
+        console.log("[safari-debug] safari.detect", {
+          isAppleMobile,
+          isWebKitSafari,
+          userAgent,
+        });
+      }
       return;
     }
 
-    const normalizer = ScrollTrigger.normalizeScroll(true);
-    gsap.defaults({ force3D: true });
-
-    return () => {
-      normalizer?.kill();
-    };
-  }, []);
+    if (isDebugSafari) {
+      console.log("[safari-debug] safari.detect", {
+        isAppleMobile,
+        isWebKitSafari,
+        userAgent,
+      });
+    }
+  }, [isDebugSafari]);
 
   useGSAP(
     () => {
@@ -324,8 +386,16 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           scrub: 1,
         },
       });
+
+      if (isDebugSafari) {
+        console.log("[safari-debug] hero.gsap.init");
+      }
     },
-    { dependencies: [locale], revertOnUpdate: true, scope: root },
+    {
+      dependencies: [isDebugSafari, locale],
+      revertOnUpdate: true,
+      scope: root,
+    },
   );
 
   useGSAP(
@@ -426,8 +496,18 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           },
         });
       }
+
+      if (isDebugSafari) {
+        console.log("[safari-debug] eyebrow.gsap.init", {
+          states: eyebrowStates.length,
+        });
+      }
     },
-    { dependencies: [locale], revertOnUpdate: true, scope: root },
+    {
+      dependencies: [isDebugSafari, locale],
+      revertOnUpdate: true,
+      scope: root,
+    },
   );
 
   useGSAP(
@@ -486,8 +566,16 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       requestAnimationFrame(() => {
         ScrollTrigger.refresh();
       });
+
+      if (isDebugSafari) {
+        console.log("[safari-debug] words.gsap.init", { words: words.length });
+      }
     },
-    { dependencies: [locale], revertOnUpdate: true, scope: root },
+    {
+      dependencies: [isDebugSafari, locale],
+      revertOnUpdate: true,
+      scope: root,
+    },
   );
 
   const handleDownload = async () => {
@@ -670,6 +758,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
               <button
                 className="button-secondary button-secondary-quiet"
                 onClick={() => {
+                  if (isDebugSafari) {
+                    console.log("[safari-debug] cv.open.click");
+                  }
                   setIsCvOpen(true);
                 }}
                 type="button"
@@ -736,6 +827,11 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
                 <Popover.Trigger
                   aria-label={current.labels.connectSheet}
                   className="button-secondary connect-trigger connect-trigger-compact"
+                  onClick={() => {
+                    if (isDebugSafari) {
+                      console.log("[safari-debug] connect.trigger.click");
+                    }
+                  }}
                 >
                   <span className="connect-trigger-leading">
                     <FiUser />
@@ -965,6 +1061,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
         aria-label="Scroll to top"
         className={`scroll-top-button ${showScrollTop ? "is-visible" : ""}`}
         onClick={() => {
+          if (isDebugSafari) {
+            console.log("[safari-debug] scrollTop.click");
+          }
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
         type="button"
@@ -977,6 +1076,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           aria-hidden="true"
           className="cv-modal-overlay"
           onClick={() => {
+            if (isDebugSafari) {
+              console.log("[safari-debug] cv.overlay.close");
+            }
             setIsCvOpen(false);
           }}
         >
@@ -1005,6 +1107,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
                 aria-label={current.labels.close}
                 className="cv-close-button"
                 onClick={() => {
+                  if (isDebugSafari) {
+                    console.log("[safari-debug] cv.close.click");
+                  }
                   setIsCvOpen(false);
                 }}
                 type="button"
@@ -1023,7 +1128,12 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             <div className="cv-modal-footer">
               <button
                 className="cv-download-button"
-                onClick={handleDownload}
+                onClick={() => {
+                  if (isDebugSafari) {
+                    console.log("[safari-debug] cv.download.click");
+                  }
+                  void handleDownload();
+                }}
                 type="button"
               >
                 <DownloadIcon />
