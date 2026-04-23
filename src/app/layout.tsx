@@ -82,31 +82,40 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <div
+          id="safari-debug-badge"
+          style={{
+            position: "fixed",
+            left: "12px",
+            bottom: "12px",
+            zIndex: 9999,
+            maxWidth: "min(82vw, 320px)",
+            padding: "8px 10px",
+            border: "1px solid rgba(255,255,255,0.14)",
+            borderRadius: "12px",
+            background: "rgba(8,10,15,0.92)",
+            color: "#f4efe6",
+            font: "600 12px/1.35 system-ui, sans-serif",
+            boxShadow: "0 12px 32px rgba(0,0,0,0.28)",
+            display: "none",
+          }}
+        >
+          inline:idle
+        </div>
         <Script id="safari-inline-debug" strategy="beforeInteractive">
           {`
               (function () {
                 try {
                   var enabled = new URLSearchParams(window.location.search).has("debugSafari");
                   if (!enabled) return;
-                  var badge = document.createElement("div");
-                  badge.id = "safari-debug-badge";
+                  var badge = document.getElementById("safari-debug-badge");
+                  if (!badge) {
+                    console.error("[safari-debug:inline] badge.missing");
+                    return;
+                  }
                   badge.setAttribute("aria-live", "polite");
                   badge.textContent = "inline:boot";
-                  badge.style.position = "fixed";
-                  badge.style.left = "12px";
-                  badge.style.bottom = "12px";
-                  badge.style.zIndex = "9999";
-                  badge.style.maxWidth = "min(82vw, 320px)";
-                  badge.style.padding = "8px 10px";
-                  badge.style.border = "1px solid rgba(255,255,255,0.14)";
-                  badge.style.borderRadius = "12px";
-                  badge.style.background = "rgba(8,10,15,0.92)";
-                  badge.style.color = "#f4efe6";
-                  badge.style.font = "600 12px/1.35 system-ui, sans-serif";
-                  badge.style.boxShadow = "0 12px 32px rgba(0,0,0,0.28)";
-                  document.addEventListener("DOMContentLoaded", function () {
-                    document.body.appendChild(badge);
-                  });
+                  badge.style.display = "block";
                   window.__portfolioSafariDebug = {
                     update: function (message, extra) {
                       try {
