@@ -6,7 +6,22 @@ import "react-pdf/dist/Page/TextLayer.css";
 // Đặt ở đây — ngoài function component
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-const defaultScale = 1;
+const getDefaultScale = () => {
+  if (typeof window === "undefined") {
+    return 1;
+  }
+
+  if (window.innerWidth <= 430) {
+    return 1.45;
+  }
+
+  if (window.innerWidth <= 767) {
+    return 1.2;
+  }
+
+  return 1;
+};
+
 const minScale = 0.8;
 const maxScale = 1.8;
 const scaleStep = 0.1;
@@ -19,12 +34,12 @@ type CvPdfViewerProps = {
 export function CvPdfViewer({ fileUrl, missingLabel }: CvPdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(defaultScale);
+  const [scale, setScale] = useState(getDefaultScale);
 
   const onLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setPageNumber(1);
-    setScale(defaultScale);
+    setScale(getDefaultScale());
   }, []);
 
   return (
@@ -61,7 +76,7 @@ export function CvPdfViewer({ fileUrl, missingLabel }: CvPdfViewerProps) {
           <button
             className="cv-fit-button"
             onClick={() => {
-              setScale(defaultScale);
+              setScale(getDefaultScale());
             }}
             type="button"
           >

@@ -102,14 +102,22 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   ];
 
   useEffect(() => {
-    const storedLocale = window.localStorage.getItem(localeStorageKey);
-    if (storedLocale === "en" || storedLocale === "vi") {
-      setLocale(storedLocale);
+    try {
+      const storedLocale = window.localStorage.getItem(localeStorageKey);
+      if (storedLocale === "en" || storedLocale === "vi") {
+        setLocale(storedLocale);
+      }
+    } catch {
+      // Safari or privacy mode can block storage access; keep default locale.
     }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(localeStorageKey, locale);
+    try {
+      window.localStorage.setItem(localeStorageKey, locale);
+    } catch {
+      // Ignore storage write failures so the rest of the client UI keeps working.
+    }
   }, [locale]);
 
   useEffect(() => {
@@ -154,6 +162,27 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const userAgent = window.navigator.userAgent;
+    const isAppleMobile =
+      /iPhone|iPad|iPod/i.test(userAgent) ||
+      (/Mac/i.test(userAgent) && "ontouchend" in document);
+    const isWebKitSafari =
+      /Safari/i.test(userAgent) &&
+      !/Chrome|CriOS|EdgiOS|FxiOS|OPiOS|DuckDuckGo/i.test(userAgent);
+
+    if (!isAppleMobile || !isWebKitSafari) {
+      return;
+    }
+
+    const normalizer = ScrollTrigger.normalizeScroll(true);
+    gsap.defaults({ force3D: true });
+
+    return () => {
+      normalizer?.kill();
+    };
+  }, []);
+
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -164,6 +193,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
         defaults: {
           duration: 0.9,
           ease: "power3.out",
+          force3D: true,
         },
       });
 
@@ -199,6 +229,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             autoAlpha: 0,
             stagger: 0.045,
             duration: 0.8,
+            force3D: true,
           },
           "-=0.5",
         )
@@ -209,6 +240,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             y: 36,
             autoAlpha: 0,
             duration: 1,
+            force3D: true,
           },
           "-=0.7",
         )
@@ -219,6 +251,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             autoAlpha: 0,
             stagger: 0.08,
             duration: 0.6,
+            force3D: true,
           },
           "-=0.4",
         );
@@ -256,6 +289,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           stagger: 0.1,
           duration: 0.9,
           ease: "power3.out",
+          force3D: true,
           scrollTrigger: {
             trigger: section,
             start: "top 78%",
@@ -272,6 +306,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             duration: 0.95,
             ease: "power3.out",
             delay: index * 0.03,
+            force3D: true,
             scrollTrigger: {
               trigger: row,
               start: "top 84%",
@@ -335,6 +370,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       gsap.set(eyebrowNode, {
         color: "#ffb074",
         textShadow: "0 0 0 rgba(0, 0, 0, 0)",
+        force3D: true,
       });
 
       const eyebrowTimeline = gsap.timeline({
@@ -350,6 +386,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
               autoAlpha: 0.74,
               duration: 0.08,
               ease: "power1.out",
+              force3D: true,
             },
             stateIndex === 0 ? "+=2.6" : "+=2.95",
           )
@@ -373,6 +410,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             autoAlpha: 1,
             duration: 0.12,
             ease: "power2.out",
+            force3D: true,
             textShadow:
               "0 0 0 rgba(255, 122, 26, 0), 0 0 0 rgba(102, 216, 255, 0)",
           });
@@ -404,6 +442,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       gsap.set(words, {
         autoAlpha: 0,
         yPercent: 100,
+        force3D: true,
       });
 
       const wordTimeline = gsap.timeline({
@@ -418,6 +457,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             yPercent: 0,
             duration: 0.55,
             ease: "power3.out",
+            force3D: true,
           })
           .to(
             word,
@@ -426,6 +466,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
               yPercent: -100,
               duration: 0.45,
               ease: "power3.in",
+              force3D: true,
             },
             "+=1.05",
           );
