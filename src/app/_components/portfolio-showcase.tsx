@@ -41,7 +41,8 @@ const localeOptions: Array<{ label: string; value: Locale }> = [
   { label: "VI", value: "vi" },
 ];
 const localeStorageKey = "portfolio-locale";
-const cvPath = "/resume/cv.pdf";
+const cvPath =
+  "https://joxnjprclihzcjvagyuz.supabase.co/storage/v1/object/public/portfolio/resume/DinhQuocBaoKhang_CV.pdf";
 const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullYear()}.pdf`;
 
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
@@ -451,6 +452,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
   const handleDownload = async () => {
     const response = await fetch(cvPath);
+    if (!response.ok) {
+      throw new Error(`Failed to download CV: ${response.status}`);
+    }
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
 

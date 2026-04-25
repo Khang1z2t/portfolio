@@ -175,7 +175,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       close: "Close",
       cvTitle: "Curriculum Vitae",
       cvMissing:
-        "Add your CV file to public/resume/*.pdf and it will appear here automatically.",
+        "Update the CV file in your Supabase storage path and it will appear here automatically.",
     },
     hero: {
       eyebrow: "Fullstack developer — Java, Spring Boot, ReactJS",
@@ -367,7 +367,7 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       close: "Đóng",
       cvTitle: "Sơ yếu lý lịch",
       cvMissing:
-        "Chỉ cần thêm file CV của bạn vào public/resume/*.pdf là phần này sẽ hiển thị ngay.",
+        "Chỉ cần cập nhật file CV trong đường dẫn Supabase Storage là phần này sẽ hiển thị tự động.",
     },
     hero: {
       eyebrow: "Lập trình viên Fullstack — Java, Spring Boot, ReactJS",
