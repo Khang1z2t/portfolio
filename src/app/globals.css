@@ -169,6 +169,106 @@ a {
   height: 1rem;
 }
 
+.not-found-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 3rem);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 122, 26, 0.2), transparent 30%),
+    radial-gradient(
+      circle at 78% 20%,
+      rgba(102, 216, 255, 0.12),
+      transparent 26%
+    ), linear-gradient(180deg, #080a0f 0%, #111620 100%);
+}
+
+.not-found-card {
+  position: relative;
+  width: min(840px, 100%);
+  padding: clamp(1.5rem, 5vw, 4rem);
+  border: 1px solid var(--line);
+  border-radius: 2.2rem;
+  background:
+    radial-gradient(
+      circle at 82% 10%,
+      rgba(255, 122, 26, 0.16),
+      transparent 24%
+    ), linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    rgba(255, 255, 255, 0.045);
+  background-size: 56px 56px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.not-found-card::before {
+  position: absolute;
+  inset: -35% auto auto 55%;
+  width: 22rem;
+  height: 22rem;
+  border-radius: 9999px;
+  background: rgba(255, 122, 26, 0.18);
+  filter: blur(56px);
+  content: "";
+}
+
+.not-found-brand {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: clamp(3rem, 8vw, 6rem);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.not-found-kicker {
+  position: relative;
+  margin: 0 0 1rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.not-found-card h1 {
+  position: relative;
+  max-width: 10ch;
+  margin: 0;
+  font-size: clamp(3.8rem, 11vw, 8.4rem);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.075em;
+  text-wrap: balance;
+}
+
+.not-found-copy {
+  position: relative;
+  max-width: 40rem;
+  margin: 1.5rem 0 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 2vw, 1.16rem);
+  line-height: 1.75;
+}
+
+.not-found-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2.2rem;
+}
+
+@supports (min-height: 100dvh) {
+  .not-found-shell {
+    min-height: 100dvh;
+  }
+}
+
 .intro-orb {
   position: absolute;
   border-radius: 9999px;
@@ -1314,11 +1414,17 @@ a {
   backdrop-filter: blur(12px);
 }
 
+.cv-modal-overlay.is-preloaded {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .cv-modal {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  width: min(900px, 100%);
-  max-height: min(92vh, 960px);
+  width: min(1120px, calc(100vw - 2rem));
+  max-height: min(94vh, 1040px);
   border: 1px solid var(--line);
   border-radius: 1.6rem;
   background:
@@ -1389,7 +1495,7 @@ a {
 .cv-document-shell {
   display: grid;
   gap: 0.9rem;
-  height: min(74vh, 820px);
+  height: min(78vh, 900px);
   padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.1rem;
@@ -1878,6 +1984,7 @@ a {
   }
 
   .cv-modal {
+    width: 100%;
     max-height: 100dvh;
     border-radius: 0.45rem;
   }

@@ -7,6 +7,8 @@ const flattenedSkills = Array.from(new Set(sharedSkillItems.flat()));
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 const metadataBase =
   siteUrl && URL.canParse(siteUrl) ? new URL(siteUrl) : undefined;
+const cvPath =
+  "https://joxnjprclihzcjvagyuz.supabase.co/storage/v1/object/public/portfolio/resume/DinhQuocBaoKhang_CV.pdf";
 
 export const metadata: Metadata = {
   metadataBase,
@@ -80,6 +82,31 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        <link
+          id="portfolio-cv-supabase-preconnect"
+          rel="preconnect"
+          href="https://joxnjprclihzcjvagyuz.supabase.co"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://joxnjprclihzcjvagyuz.supabase.co"
+        />
+        <link
+          id="portfolio-cv-worker-preconnect"
+          rel="preconnect"
+          href="https://unpkg.com"
+        />
+        <link rel="dns-prefetch" href="https://unpkg.com" />
+        <link
+          id="portfolio-cv-preload"
+          rel="prefetch"
+          href={cvPath}
+          as="fetch"
+          type="application/pdf"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Analytics />

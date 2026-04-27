@@ -12,7 +12,14 @@ import * as Select from "@radix-ui/react-select";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
-import { startTransition, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  type MouseEvent,
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa6";
 import { FiChevronDown, FiMail, FiPhone, FiUser } from "react-icons/fi";
 import { SiZalo } from "react-icons/si";
@@ -24,13 +31,12 @@ import {
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const CvPdfViewer = dynamic(
-  () =>
-    import("@/app/_components/cv-pdf-viewer").then((mod) => mod.CvPdfViewer),
-  {
-    ssr: false,
-  },
-);
+const loadCvPdfViewer = () =>
+  import("@/app/_components/cv-pdf-viewer").then((mod) => mod.CvPdfViewer);
+
+const CvPdfViewer = dynamic(loadCvPdfViewer, {
+  ssr: false,
+});
 
 type PortfolioShowcaseProps = {
   content: Record<Locale, LocalizedContent>;
@@ -44,8 +50,90 @@ const localeStorageKey = "portfolio-locale";
 const cvPath =
   "https://joxnjprclihzcjvagyuz.supabase.co/storage/v1/object/public/portfolio/resume/DinhQuocBaoKhang_CV.pdf";
 const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullYear()}.pdf`;
+const cvPreloadLinkId = "portfolio-cv-preload";
+const cvSupabasePreconnectId = "portfolio-cv-supabase-preconnect";
+const cvWorkerPreconnectId = "portfolio-cv-worker-preconnect";
+const trackedSectionRoutes = {
+  home: "/",
+  about: "/about",
+  work: "/work",
+  skills: "/skills",
+  pipeline: "/how-i-work",
+  engineering: "/mindset",
+  contact: "/contact",
+  cv: "/cv",
+} as const;
+
+const pathToSectionId: Record<string, keyof typeof trackedSectionRoutes> = {
+  "/": "home",
+  "/about": "about",
+  "/work": "work",
+  "/skills": "skills",
+  "/how-i-work": "pipeline",
+  "/mindset": "engineering",
+  "/contact": "contact",
+  "/cv": "cv",
+};
+
+const scrollToSection = (sectionId: string) => {
+  if (sectionId === "home") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  document
+    .getElementById(sectionId)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+const updateBrowserPath = (path: string) => {
+  if (window.location.pathname === path) {
+    return;
+  }
+
+  window.history.pushState({}, "", path);
+};
+
+const warmUpCvAssets = () => {
+  void loadCvPdfViewer();
+
+  if (!document.getElementById(cvSupabasePreconnectId)) {
+    const link = document.createElement("link");
+    link.id = cvSupabasePreconnectId;
+    link.rel = "preconnect";
+    link.href = new URL(cvPath).origin;
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
+
+  if (!document.getElementById(cvWorkerPreconnectId)) {
+    const link = document.createElement("link");
+    link.id = cvWorkerPreconnectId;
+    link.rel = "preconnect";
+    link.href = "https://unpkg.com";
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
+
+  if (!document.getElementById(cvPreloadLinkId)) {
+    const link = document.createElement("link");
+    link.id = cvPreloadLinkId;
+    link.rel = "prefetch";
+    link.as = "fetch";
+    link.href = cvPath;
+    link.type = "application/pdf";
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
+
+  void fetch(cvPath, {
+    cache: "force-cache",
+    mode: "cors",
+  }).catch(() => undefined);
+};
 
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
+  const initialPathname = usePathname();
   const root = useRef<HTMLElement | null>(null);
   const heroCopyRef = useRef<HTMLDivElement | null>(null);
   const eyebrowTextRef = useRef<HTMLSpanElement | null>(null);
@@ -53,6 +141,8 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [isCvOpen, setIsCvOpen] = useState(false);
+  const [isCvPrimed, setIsCvPrimed] = useState(false);
+  const [currentPath, setCurrentPath] = useState(initialPathname);
   const current = content[locale];
   const footerYear = new Date().getFullYear();
   const contactPhoneHref = `tel:+84${current.contactPhone.replace(/^0/, "")}`;
@@ -102,6 +192,39 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     },
   ];
 
+  const navigateToSection =
+    (section: keyof typeof trackedSectionRoutes) =>
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+
+      const nextPath = trackedSectionRoutes[section];
+      const isCurrentPath = currentPath === nextPath;
+
+      if (section === "cv") {
+        if (!isCurrentPath) {
+          updateBrowserPath(nextPath);
+          setCurrentPath(nextPath);
+        }
+
+        setIsCvOpen(true);
+        return;
+      }
+
+      setIsCvOpen(false);
+
+      if (isCurrentPath) {
+        scrollToSection(section);
+        return;
+      }
+
+      updateBrowserPath(nextPath);
+      setCurrentPath(nextPath);
+    };
+
+  const closeCv = () => {
+    setIsCvOpen(false);
+  };
+
   useEffect(() => {
     const storedLocale = window.localStorage.getItem(localeStorageKey);
     if (storedLocale === "en" || storedLocale === "vi") {
@@ -112,6 +235,29 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   useEffect(() => {
     window.localStorage.setItem(localeStorageKey, locale);
   }, [locale]);
+
+  useEffect(() => {
+    const runWarmUp = () => {
+      warmUpCvAssets();
+      setIsCvPrimed(true);
+    };
+
+    if ("requestIdleCallback" in globalThis) {
+      const idleId = globalThis.requestIdleCallback(runWarmUp, {
+        timeout: 2500,
+      });
+
+      return () => {
+        globalThis.cancelIdleCallback(idleId);
+      };
+    }
+
+    const timeoutId = globalThis.setTimeout(runWarmUp, 1200);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isCvOpen) {
@@ -133,6 +279,36 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isCvOpen]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = pathToSectionId[currentPath];
+    if (!section) {
+      return;
+    }
+
+    if (section === "cv") {
+      setIsCvOpen(true);
+      return;
+    }
+
+    setIsCvOpen(false);
+
+    requestAnimationFrame(() => {
+      scrollToSection(section);
+    });
+  }, [currentPath]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -470,43 +646,65 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     <header
       className={`topbar ${mode === "hero" ? "topbar--hero" : "topbar--sticky"} ${mode === "sticky" ? "js-topbar" : ""}`}
     >
-      <a className="brand-mark" href="#home">
+      <a
+        className="brand-mark"
+        href={trackedSectionRoutes.home}
+        onClick={navigateToSection("home")}
+      >
         {current.brand}
       </a>
 
       <div className="topbar-actions">
         <nav aria-label="Primary" className="topnav">
-          <a href="#about">
+          <a
+            href={trackedSectionRoutes.about}
+            onClick={navigateToSection("about")}
+          >
             <span className="nav-label-desktop">{current.nav.about}</span>
             <span className="nav-label-mobile">
               {current.nav.aboutShort ?? current.nav.about}
             </span>
           </a>
-          <a href="#work">
+          <a
+            href={trackedSectionRoutes.work}
+            onClick={navigateToSection("work")}
+          >
             <span className="nav-label-desktop">{current.nav.work}</span>
             <span className="nav-label-mobile">
               {current.nav.workShort ?? current.nav.work}
             </span>
           </a>
-          <a href="#skills">
+          <a
+            href={trackedSectionRoutes.skills}
+            onClick={navigateToSection("skills")}
+          >
             <span className="nav-label-desktop">{current.nav.skills}</span>
             <span className="nav-label-mobile">
               {current.nav.skillsShort ?? current.nav.skills}
             </span>
           </a>
-          <a href="#pipeline">
+          <a
+            href={trackedSectionRoutes.pipeline}
+            onClick={navigateToSection("pipeline")}
+          >
             <span className="nav-label-desktop">{current.nav.pipeline}</span>
             <span className="nav-label-mobile">
               {current.nav.pipelineShort ?? current.nav.pipeline}
             </span>
           </a>
-          <a href="#engineering">
+          <a
+            href={trackedSectionRoutes.engineering}
+            onClick={navigateToSection("engineering")}
+          >
             <span className="nav-label-desktop">{current.nav.engineering}</span>
             <span className="nav-label-mobile">
               {current.nav.engineeringShort ?? current.nav.engineering}
             </span>
           </a>
-          <a href="#contact">
+          <a
+            href={trackedSectionRoutes.contact}
+            onClick={navigateToSection("contact")}
+          >
             <span className="nav-label-desktop">{current.nav.contact}</span>
             <span className="nav-label-mobile">
               {current.nav.contactShort ?? current.nav.contact}
@@ -624,21 +822,27 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             <p className="hero-summary js-hero-meta">{current.hero.summary}</p>
 
             <div className="hero-actions js-hero-meta">
-              <a className="button-primary" href="#work">
+              <a
+                className="button-primary"
+                href={trackedSectionRoutes.work}
+                onClick={navigateToSection("work")}
+              >
                 {current.hero.primaryAction}
               </a>
-              <a className="button-secondary" href="#skills">
+              <a
+                className="button-secondary"
+                href={trackedSectionRoutes.skills}
+                onClick={navigateToSection("skills")}
+              >
                 {current.hero.secondaryAction}
               </a>
-              <button
+              <a
                 className="button-secondary button-secondary-quiet"
-                onClick={() => {
-                  setIsCvOpen(true);
-                }}
-                type="button"
+                href={trackedSectionRoutes.cv}
+                onClick={navigateToSection("cv")}
               >
                 {current.labels.viewCv}
-              </button>
+              </a>
             </div>
 
             <div className="hero-note js-hero-meta">
@@ -756,7 +960,8 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
               <a
                 className="button-secondary connect-trigger-compact"
-                href="#contact"
+                href={trackedSectionRoutes.contact}
+                onClick={navigateToSection("contact")}
               >
                 <span className="connect-trigger-leading">
                   <FiMail />
@@ -928,19 +1133,25 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
         aria-label="Scroll to top"
         className={`scroll-top-button ${showScrollTop ? "is-visible" : ""}`}
         onClick={() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          if (currentPath === trackedSectionRoutes.home) {
+            scrollToSection("home");
+            return;
+          }
+
+          updateBrowserPath(trackedSectionRoutes.home);
+          setCurrentPath(trackedSectionRoutes.home);
         }}
         type="button"
       >
         <ArrowUpIcon />
       </button>
 
-      {isCvOpen ? (
+      {isCvOpen || isCvPrimed ? (
         <div
-          aria-hidden="true"
-          className="cv-modal-overlay"
+          aria-hidden={!isCvOpen}
+          className={`cv-modal-overlay ${isCvOpen ? "is-open" : "is-preloaded"}`}
           onClick={() => {
-            setIsCvOpen(false);
+            closeCv();
           }}
         >
           <div
@@ -968,7 +1179,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
                 aria-label={current.labels.close}
                 className="cv-close-button"
                 onClick={() => {
-                  setIsCvOpen(false);
+                  closeCv();
                 }}
                 type="button"
               >
