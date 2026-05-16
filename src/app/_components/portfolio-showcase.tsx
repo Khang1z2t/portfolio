@@ -1,47 +1,31 @@
 "use client";
 
 import { useGSAP } from "@gsap/react";
-import {
-  ArrowUpIcon,
-  ChevronDownIcon,
-  Cross2Icon,
-  DownloadIcon,
-} from "@radix-ui/react-icons";
-import * as Popover from "@radix-ui/react-popover";
-import * as Select from "@radix-ui/react-select";
+import { ArrowUpIcon } from "@radix-ui/react-icons";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import {
-  type MouseEvent,
-  startTransition,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa6";
-import { FiChevronDown, FiMail, FiPhone, FiUser } from "react-icons/fi";
+import { FiMail, FiPhone } from "react-icons/fi";
 import { SiZalo } from "react-icons/si";
-import {
-  type Locale,
-  type LocalizedContent,
-  sharedSkillItems,
-} from "@/data/portfolio";
+import { AboutSection } from "@/app/_components/portfolio/about-section";
+import { ContactSection } from "@/app/_components/portfolio/contact-section";
+import { CvModal } from "@/app/_components/portfolio/cv-modal";
+import { EngineeringSection } from "@/app/_components/portfolio/engineering-section";
+import { HeroSection } from "@/app/_components/portfolio/hero-section";
+import { PipelineSection } from "@/app/_components/portfolio/pipeline-section";
+import { PortfolioTopbar } from "@/app/_components/portfolio/portfolio-topbar";
+import { ProjectsSection } from "@/app/_components/portfolio/projects-section";
+import { SkillsSection } from "@/app/_components/portfolio/skills-section";
+import type { Locale, LocalizedContent } from "@/data/portfolio";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
 const loadCvPdfViewer = () =>
   import("@/app/_components/cv-pdf-viewer").then((mod) => mod.CvPdfViewer);
-
-const CvPdfViewer = dynamic(loadCvPdfViewer, {
-  ssr: false,
-});
-
-type PortfolioShowcaseProps = {
-  content: Record<Locale, LocalizedContent>;
-};
-
+const CvPdfViewer = dynamic(loadCvPdfViewer, { ssr: false });
+type PortfolioShowcaseProps = { content: Record<Locale, LocalizedContent> };
 const localeOptions: Array<{ label: string; value: Locale }> = [
   { label: "EN", value: "en" },
   { label: "VI", value: "vi" },
@@ -63,7 +47,6 @@ const trackedSectionRoutes = {
   contact: "/contact",
   cv: "/cv",
 } as const;
-
 const pathToSectionId: Record<string, keyof typeof trackedSectionRoutes> = {
   "/": "home",
   "/about": "about",
@@ -74,29 +57,18 @@ const pathToSectionId: Record<string, keyof typeof trackedSectionRoutes> = {
   "/contact": "contact",
   "/cv": "cv",
 };
-
 const scrollToSection = (sectionId: string) => {
-  if (sectionId === "home") {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return;
-  }
-
+  if (sectionId === "home")
+    return window.scrollTo({ top: 0, behavior: "smooth" });
   document
     .getElementById(sectionId)
     ?.scrollIntoView({ behavior: "smooth", block: "start" });
 };
-
 const updateBrowserPath = (path: string) => {
-  if (window.location.pathname === path) {
-    return;
-  }
-
-  window.history.pushState({}, "", path);
+  if (window.location.pathname !== path) window.history.pushState({}, "", path);
 };
-
 const warmUpCvAssets = () => {
   void loadCvPdfViewer();
-
   if (!document.getElementById(cvSupabasePreconnectId)) {
     const link = document.createElement("link");
     link.id = cvSupabasePreconnectId;
@@ -105,7 +77,6 @@ const warmUpCvAssets = () => {
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
   }
-
   if (!document.getElementById(cvWorkerPreconnectId)) {
     const link = document.createElement("link");
     link.id = cvWorkerPreconnectId;
@@ -114,7 +85,6 @@ const warmUpCvAssets = () => {
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
   }
-
   if (!document.getElementById(cvPreloadLinkId)) {
     const link = document.createElement("link");
     link.id = cvPreloadLinkId;
@@ -125,11 +95,9 @@ const warmUpCvAssets = () => {
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
   }
-
-  void fetch(cvPath, {
-    cache: "force-cache",
-    mode: "cors",
-  }).catch(() => undefined);
+  void fetch(cvPath, { cache: "force-cache", mode: "cors" }).catch(
+    () => undefined,
+  );
 };
 
 export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
@@ -143,6 +111,12 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [isCvOpen, setIsCvOpen] = useState(false);
   const [isCvPrimed, setIsCvPrimed] = useState(false);
   const [currentPath, setCurrentPath] = useState(initialPathname);
+  const lastNonCvPathRef = useRef(
+    initialPathname === trackedSectionRoutes.cv
+      ? trackedSectionRoutes.home
+      : initialPathname,
+  );
+  const skipNextPathScrollRef = useRef(false);
   const current = content[locale];
   const footerYear = new Date().getFullYear();
   const contactPhoneHref = `tel:+84${current.contactPhone.replace(/^0/, "")}`;
@@ -191,229 +165,136 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       external: true,
     },
   ];
-
   const navigateToSection =
     (section: keyof typeof trackedSectionRoutes) =>
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
-
       const nextPath = trackedSectionRoutes[section];
       const isCurrentPath = currentPath === nextPath;
-
       if (section === "cv") {
+        if (currentPath !== trackedSectionRoutes.cv) {
+          lastNonCvPathRef.current = currentPath;
+        }
         if (!isCurrentPath) {
           updateBrowserPath(nextPath);
           setCurrentPath(nextPath);
         }
-
         setIsCvOpen(true);
         return;
       }
-
       setIsCvOpen(false);
-
-      if (isCurrentPath) {
-        scrollToSection(section);
-        return;
-      }
-
+      lastNonCvPathRef.current = nextPath;
+      if (isCurrentPath) return scrollToSection(section);
       updateBrowserPath(nextPath);
       setCurrentPath(nextPath);
     };
-
   const closeCv = () => {
+    const fallbackPath = lastNonCvPathRef.current || trackedSectionRoutes.home;
     setIsCvOpen(false);
+    if (currentPath !== fallbackPath) {
+      skipNextPathScrollRef.current = true;
+      updateBrowserPath(fallbackPath);
+      setCurrentPath(fallbackPath);
+    }
   };
-
   useEffect(() => {
     const storedLocale = window.localStorage.getItem(localeStorageKey);
-    if (storedLocale === "en" || storedLocale === "vi") {
-      setLocale(storedLocale);
-    }
+    if (storedLocale === "en" || storedLocale === "vi") setLocale(storedLocale);
   }, []);
-
   useEffect(() => {
     window.localStorage.setItem(localeStorageKey, locale);
   }, [locale]);
-
   useEffect(() => {
     const runWarmUp = () => {
       warmUpCvAssets();
       setIsCvPrimed(true);
     };
-
     if ("requestIdleCallback" in globalThis) {
       const idleId = globalThis.requestIdleCallback(runWarmUp, {
         timeout: 2500,
       });
-
-      return () => {
-        globalThis.cancelIdleCallback(idleId);
-      };
+      return () => globalThis.cancelIdleCallback(idleId);
     }
-
     const timeoutId = globalThis.setTimeout(runWarmUp, 1200);
-
-    return () => {
-      globalThis.clearTimeout(timeoutId);
-    };
+    return () => globalThis.clearTimeout(timeoutId);
   }, []);
-
   useEffect(() => {
-    if (!isCvOpen) {
-      return;
-    }
-
+    if (!isCvOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsCvOpen(false);
-      }
+      if (event.key === "Escape") setIsCvOpen(false);
     };
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isCvOpen]);
-
   useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
-    };
-
+    const handlePopState = () => setCurrentPath(window.location.pathname);
     window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
-
   useEffect(() => {
     const section = pathToSectionId[currentPath];
-    if (!section) {
-      return;
-    }
-
-    if (section === "cv") {
-      setIsCvOpen(true);
-      return;
-    }
-
+    if (!section) return;
+    if (section === "cv") return setIsCvOpen(true);
+    lastNonCvPathRef.current = currentPath;
     setIsCvOpen(false);
-
-    requestAnimationFrame(() => {
-      scrollToSection(section);
-    });
+    if (skipNextPathScrollRef.current) {
+      skipNextPathScrollRef.current = false;
+      return;
+    }
+    requestAnimationFrame(() => scrollToSection(section));
   }, [currentPath]);
-
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 280);
-
       const aboutSection = document.getElementById("about");
-      if (!aboutSection) {
-        setShowStickyHeader(false);
-        return;
-      }
-
+      if (!aboutSection) return setShowStickyHeader(false);
       setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
     };
-
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        return;
-      }
-
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const heroTimeline = gsap.timeline({
-        defaults: {
-          duration: 0.9,
-          ease: "power3.out",
-        },
+        defaults: { duration: 0.9, ease: "power3.out" },
       });
-
-      // Intro experiment is intentionally disabled for now.
-      // heroTimeline.from(".js-intro-reveal", {
-      //   y: 28,
-      //   autoAlpha: 0,
-      //   stagger: 0.12,
-      //   duration: 0.85,
-      // });
       heroTimeline
-        .from(
-          ".js-topbar",
-          {
-            y: -24,
-            autoAlpha: 0,
-          },
-          "-=0.35",
-        )
-        .from(
-          ".js-hero-meta",
-          {
-            y: 28,
-            autoAlpha: 0,
-            stagger: 0.08,
-          },
-          "-=0.55",
-        )
+        .from(".js-topbar", { y: -24, autoAlpha: 0 }, "-=0.35")
+        .from(".js-hero-meta", { y: 28, autoAlpha: 0, stagger: 0.08 }, "-=0.55")
         .from(
           ".js-hero-word",
-          {
-            yPercent: 120,
-            autoAlpha: 0,
-            stagger: 0.045,
-            duration: 0.8,
-          },
+          { yPercent: 120, autoAlpha: 0, stagger: 0.045, duration: 0.8 },
           "-=0.5",
         )
         .from(
           ".js-hero-panel",
-          {
-            scale: 0.96,
-            y: 36,
-            autoAlpha: 0,
-            duration: 1,
-          },
+          { scale: 0.96, y: 36, autoAlpha: 0, duration: 1 },
           "-=0.7",
         )
         .from(
           ".js-capability",
-          {
-            y: 18,
-            autoAlpha: 0,
-            stagger: 0.08,
-            duration: 0.6,
-          },
+          { y: 18, autoAlpha: 0, stagger: 0.08, duration: 0.6 },
           "-=0.4",
         );
-
       gsap.to(".js-ring-slow", {
         rotation: 360,
         duration: 34,
         ease: "none",
         repeat: -1,
       });
-
       gsap.to(".js-ring-fast", {
         rotation: -360,
         duration: 22,
         ease: "none",
         repeat: -1,
       });
-
       gsap.to(".js-hero-panel", {
         yPercent: -10,
         rotateX: 4,
@@ -425,7 +306,6 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           scrub: 1.1,
         },
       });
-
       gsap.utils.toArray<HTMLElement>(".js-section").forEach((section) => {
         gsap.from(section.querySelectorAll(".js-reveal"), {
           y: 44,
@@ -433,13 +313,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           stagger: 0.1,
           duration: 0.9,
           ease: "power3.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 78%",
-          },
+          scrollTrigger: { trigger: section, start: "top 78%" },
         });
       });
-
       gsap.utils
         .toArray<HTMLElement>(".js-project-row")
         .forEach((row, index) => {
@@ -449,13 +325,9 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             duration: 0.95,
             ease: "power3.out",
             delay: index * 0.03,
-            scrollTrigger: {
-              trigger: row,
-              start: "top 84%",
-            },
+            scrollTrigger: { trigger: row, start: "top 84%" },
           });
         });
-
       gsap.to(".js-progress-line", {
         scaleX: 1,
         ease: "none",
@@ -469,7 +341,6 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     },
     { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
-
   useGSAP(
     () => {
       const heroCopyNode = heroCopyRef.current;
@@ -477,57 +348,36 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       const eyebrowStates = current.hero.eyebrowStates?.length
         ? current.hero.eyebrowStates
         : [current.hero.eyebrow];
-
       if (!eyebrowNode || eyebrowStates.length <= 1) {
-        if (eyebrowNode) {
+        if (eyebrowNode)
           eyebrowNode.textContent = eyebrowStates[0] ?? current.hero.eyebrow;
-        }
         return;
       }
-
       const glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+-/<>?=~";
       let eyebrowIndex = 0;
-
       const setScrambledText = (targetText: string, progress: number) => {
         const revealCount = Math.floor(targetText.length * progress);
-        const nextText = targetText
+        eyebrowNode.textContent = targetText
           .split("")
           .map((char, index) => {
-            if (char === " " || char === "—" || char === "," || char === ".") {
+            if (char === " " || char === "—" || char === "," || char === ".")
               return char;
-            }
-
-            if (index < revealCount) {
-              return targetText[index];
-            }
-
+            if (index < revealCount) return targetText[index];
             return glyphs[Math.floor(Math.random() * glyphs.length)];
           })
           .join("");
-
-        eyebrowNode.textContent = nextText;
       };
-
       eyebrowNode.textContent = eyebrowStates[0];
       gsap.set(eyebrowNode, {
         color: "#ffb074",
         textShadow: "0 0 0 rgba(0, 0, 0, 0)",
       });
-
-      const eyebrowTimeline = gsap.timeline({
-        repeat: -1,
-        repeatDelay: 0.72,
-      });
-
+      const eyebrowTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0.72 });
       eyebrowStates.forEach((_state, stateIndex) => {
         eyebrowTimeline
           .to(
             eyebrowNode,
-            {
-              autoAlpha: 0.74,
-              duration: 0.08,
-              ease: "power1.out",
-            },
+            { autoAlpha: 0.74, duration: 0.08, ease: "power1.out" },
             stateIndex === 0 ? "+=2.6" : "+=2.95",
           )
           .to(eyebrowNode, {
@@ -554,8 +404,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
               "0 0 0 rgba(255, 122, 26, 0), 0 0 0 rgba(102, 216, 255, 0)",
           });
       });
-
-      if (heroCopyNode) {
+      if (heroCopyNode)
         ScrollTrigger.create({
           trigger: heroCopyNode,
           start: "top bottom",
@@ -564,30 +413,19 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             eyebrowTimeline.paused(!self.isActive);
           },
         });
-      }
     },
     { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
-
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         ScrollTrigger.refresh();
         return;
       }
-
       const heroCopyNode = heroCopyRef.current;
       const words = gsap.utils.toArray<HTMLElement>(".js-rotating-word");
-      gsap.set(words, {
-        autoAlpha: 0,
-        yPercent: 100,
-      });
-
-      const wordTimeline = gsap.timeline({
-        repeat: -1,
-        repeatDelay: 0.3,
-      });
-
+      gsap.set(words, { autoAlpha: 0, yPercent: 100 });
+      const wordTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0.3 });
       words.forEach((word) => {
         wordTimeline
           .to(word, {
@@ -598,17 +436,11 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           })
           .to(
             word,
-            {
-              autoAlpha: 0,
-              yPercent: -100,
-              duration: 0.45,
-              ease: "power3.in",
-            },
+            { autoAlpha: 0, yPercent: -100, duration: 0.45, ease: "power3.in" },
             "+=1.05",
           );
       });
-
-      if (heroCopyNode) {
+      if (heroCopyNode)
         ScrollTrigger.create({
           trigger: heroCopyNode,
           start: "top bottom",
@@ -617,364 +449,61 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             wordTimeline.paused(!self.isActive);
           },
         });
-      }
-
-      requestAnimationFrame(() => {
-        ScrollTrigger.refresh();
-      });
+      requestAnimationFrame(() => ScrollTrigger.refresh());
     },
     { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
-
   const handleDownload = async () => {
     const response = await fetch(cvPath);
-    if (!response.ok) {
+    if (!response.ok)
       throw new Error(`Failed to download CV: ${response.status}`);
-    }
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = cvDownloadName;
     a.click();
-
     URL.revokeObjectURL(url);
   };
 
-  const renderTopbar = (mode: "hero" | "sticky") => (
-    <header
-      className={`topbar ${mode === "hero" ? "topbar--hero" : "topbar--sticky"} ${mode === "sticky" ? "js-topbar" : ""}`}
-    >
-      <a
-        className="brand-mark"
-        href={trackedSectionRoutes.home}
-        onClick={navigateToSection("home")}
-      >
-        {current.brand}
-      </a>
-
-      <div className="topbar-actions">
-        <nav aria-label="Primary" className="topnav">
-          <a
-            href={trackedSectionRoutes.about}
-            onClick={navigateToSection("about")}
-          >
-            <span className="nav-label-desktop">{current.nav.about}</span>
-            <span className="nav-label-mobile">
-              {current.nav.aboutShort ?? current.nav.about}
-            </span>
-          </a>
-          <a
-            href={trackedSectionRoutes.work}
-            onClick={navigateToSection("work")}
-          >
-            <span className="nav-label-desktop">{current.nav.work}</span>
-            <span className="nav-label-mobile">
-              {current.nav.workShort ?? current.nav.work}
-            </span>
-          </a>
-          <a
-            href={trackedSectionRoutes.skills}
-            onClick={navigateToSection("skills")}
-          >
-            <span className="nav-label-desktop">{current.nav.skills}</span>
-            <span className="nav-label-mobile">
-              {current.nav.skillsShort ?? current.nav.skills}
-            </span>
-          </a>
-          <a
-            href={trackedSectionRoutes.pipeline}
-            onClick={navigateToSection("pipeline")}
-          >
-            <span className="nav-label-desktop">{current.nav.pipeline}</span>
-            <span className="nav-label-mobile">
-              {current.nav.pipelineShort ?? current.nav.pipeline}
-            </span>
-          </a>
-          <a
-            href={trackedSectionRoutes.engineering}
-            onClick={navigateToSection("engineering")}
-          >
-            <span className="nav-label-desktop">{current.nav.engineering}</span>
-            <span className="nav-label-mobile">
-              {current.nav.engineeringShort ?? current.nav.engineering}
-            </span>
-          </a>
-          <a
-            href={trackedSectionRoutes.contact}
-            onClick={navigateToSection("contact")}
-          >
-            <span className="nav-label-desktop">{current.nav.contact}</span>
-            <span className="nav-label-mobile">
-              {current.nav.contactShort ?? current.nav.contact}
-            </span>
-          </a>
-        </nav>
-
-        <div className="locale-picker">
-          <Select.Root
-            value={locale}
-            onValueChange={(value) => {
-              startTransition(() => {
-                setLocale(value as Locale);
-              });
-            }}
-          >
-            <Select.Trigger
-              className="locale-trigger"
-              aria-label={current.labels.language}
-            >
-              <Select.Value />
-              <Select.Icon className="locale-trigger-icon">
-                <ChevronDownIcon />
-              </Select.Icon>
-            </Select.Trigger>
-
-            <Select.Portal>
-              <Select.Content
-                className="locale-content"
-                position="popper"
-                sideOffset={10}
-              >
-                <Select.Viewport className="locale-viewport">
-                  {localeOptions.map((option) => (
-                    <Select.Item
-                      className="locale-item"
-                      key={option.value}
-                      value={option.value}
-                    >
-                      <Select.ItemText>{option.label}</Select.ItemText>
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-        </div>
-      </div>
-    </header>
-  );
-
   return (
     <main className="portfolio-shell" ref={root}>
-      {/*
-        Intro overlay experiment is paused for now.
-        Keeping the markup here makes it easy to re-enable later without rebuilding it.
-      <section className="intro-section js-intro" id="top">
-        <div className="intro-orb intro-orb-left" />
-        <div className="intro-orb intro-orb-right" />
-        <div className="intro-grid-overlay" />
-
-        <div className="intro-copy js-intro-copy">
-          <p className="intro-kicker js-intro-reveal">{current.brand}</p>
-          <h1 className="intro-title js-intro-reveal">{intro.title}</h1>
-          <button className="intro-scroll js-intro-reveal" type="button">
-            <span>{intro.action}</span>
-            <ChevronDownIcon />
-          </button>
-        </div>
-      </section>
-      */}
-
       <div className={`topbar-shell ${showStickyHeader ? "is-visible" : ""}`}>
-        {renderTopbar("sticky")}
+        <PortfolioTopbar
+          mode="sticky"
+          current={current}
+          locale={locale}
+          localeOptions={localeOptions}
+          trackedSectionRoutes={trackedSectionRoutes}
+          navigateToSection={navigateToSection}
+          setLocale={setLocale}
+        />
       </div>
-
-      <section className="hero-section js-hero" id="home">
-        <div className="hero-glow hero-glow-left" />
-        <div className="hero-glow hero-glow-right" />
-        <div className="hero-noise" />
-        {renderTopbar("hero")}
-
-        <div className="hero-grid">
-          <div className="hero-copy" ref={heroCopyRef}>
-            <p className="eyebrow js-hero-meta">
-              <span className="js-eyebrow-text" ref={eyebrowTextRef}>
-                {current.hero.eyebrowStates?.[0] ?? current.hero.eyebrow}
-              </span>
-            </p>
-
-            <div className="hero-heading" key={`${locale}-heading`}>
-              {current.hero.headingWords.map((word) => (
-                <span className="hero-word-wrap" key={word}>
-                  <span className="hero-word js-hero-word">{word}</span>
-                </span>
-              ))}
-            </div>
-
-            <div className="hero-rotating js-hero-meta" aria-hidden="true">
-              <span className="hero-rotating-label">
-                {current.labels.nowItFeels}
-              </span>
-              <span
-                className="hero-rotating-stage js-word-stage"
-                key={`${locale}-words`}
-              >
-                {current.hero.animatedWords.map((word) => (
-                  <span className="rotating-word js-rotating-word" key={word}>
-                    {word}
-                  </span>
-                ))}
-              </span>
-            </div>
-
-            <p className="hero-summary js-hero-meta">{current.hero.summary}</p>
-
-            <div className="hero-actions js-hero-meta">
-              <a
-                className="button-primary"
-                href={trackedSectionRoutes.work}
-                onClick={navigateToSection("work")}
-              >
-                {current.hero.primaryAction}
-              </a>
-              <a
-                className="button-secondary"
-                href={trackedSectionRoutes.skills}
-                onClick={navigateToSection("skills")}
-              >
-                {current.hero.secondaryAction}
-              </a>
-              <a
-                className="button-secondary button-secondary-quiet"
-                href={trackedSectionRoutes.cv}
-                onClick={navigateToSection("cv")}
-              >
-                {current.labels.viewCv}
-              </a>
-            </div>
-
-            <div className="hero-note js-hero-meta">
-              {current.hero.notes.map((note) => (
-                <span key={note}>{note}</span>
-              ))}
-            </div>
-          </div>
-
-          <div className="hero-panel js-hero-panel">
-            <div className="panel-caption">
-              <span>{current.panel.captionLeft}</span>
-              <span>{current.panel.captionRight}</span>
-            </div>
-
-            <div className="panel-orbit">
-              <div className="orbit-core" />
-              <div className="ring ring-large js-ring-slow" />
-              <div className="ring ring-medium js-ring-fast" />
-              <div className="ring ring-small js-ring-slow" />
-              <div className="scan-line" />
-            </div>
-
-            <div className="panel-stack">
-              <div className="panel-chip">
-                <span>{current.panel.primaryLabel}</span>
-                <strong>{current.panel.primaryValue}</strong>
-              </div>
-              <div className="panel-chip muted">
-                <span>{current.panel.secondaryLabel}</span>
-                <strong>{current.panel.secondaryValue}</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="content-section about-section js-section" id="about">
-        <div className="about-grid">
-          <div className="about-copy">
-            <p className="eyebrow js-reveal">{current.about.eyebrow}</p>
-            <h2 className="about-heading js-reveal">{current.about.heading}</h2>
-            <p className="detail-copy js-reveal">{current.about.description}</p>
-          </div>
-
-          <div className="about-card js-reveal">
-            <div className="about-facts-grid">
-              {current.about.facts.map((fact) => (
-                <div className="about-fact" key={fact.label}>
-                  <p>{fact.label}</p>
-                  <strong>{fact.value}</strong>
-                </div>
-              ))}
-            </div>
-
-            <div className="about-actions">
-              <Popover.Root>
-                <Popover.Trigger
-                  aria-label={current.labels.connectSheet}
-                  className="button-secondary connect-trigger connect-trigger-compact"
-                >
-                  <span className="connect-trigger-leading">
-                    <FiUser />
-                  </span>
-                  <span className="connect-trigger-label">
-                    {current.labels.connect}
-                  </span>
-                  <span className="connect-trigger-icon">
-                    <FiChevronDown />
-                  </span>
-                </Popover.Trigger>
-
-                <Popover.Portal>
-                  <Popover.Content
-                    align="start"
-                    avoidCollisions
-                    className="connect-content"
-                    collisionPadding={16}
-                    sideOffset={10}
-                  >
-                    <div className="connect-title">
-                      {current.labels.connectSheet}
-                    </div>
-
-                    <div className="connect-viewport">
-                      {connectLinks.map((item) =>
-                        item.href ? (
-                          <a
-                            className="connect-item"
-                            href={item.href}
-                            key={item.key}
-                            rel={item.external ? "noreferrer" : undefined}
-                            target={item.external ? "_blank" : undefined}
-                          >
-                            <span className="connect-icon">{item.icon}</span>
-                            <span>{item.label}</span>
-                          </a>
-                        ) : (
-                          <span
-                            aria-disabled="true"
-                            className="connect-item is-disabled"
-                            key={item.key}
-                          >
-                            <span className="connect-icon">{item.icon}</span>
-                            <span>{item.label}</span>
-                          </span>
-                        ),
-                      )}
-                    </div>
-
-                    <Popover.Arrow className="connect-arrow" />
-                  </Popover.Content>
-                </Popover.Portal>
-              </Popover.Root>
-
-              <a
-                className="button-secondary connect-trigger-compact"
-                href={trackedSectionRoutes.contact}
-                onClick={navigateToSection("contact")}
-              >
-                <span className="connect-trigger-leading">
-                  <FiMail />
-                </span>
-                <span className="connect-trigger-label">
-                  {current.nav.contact}
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <HeroSection
+        current={current}
+        locale={locale}
+        trackedSectionRoutes={trackedSectionRoutes}
+        navigateToSection={navigateToSection}
+        heroCopyRef={heroCopyRef}
+        eyebrowTextRef={eyebrowTextRef}
+        topbar={
+          <PortfolioTopbar
+            mode="hero"
+            current={current}
+            locale={locale}
+            localeOptions={localeOptions}
+            trackedSectionRoutes={trackedSectionRoutes}
+            navigateToSection={navigateToSection}
+            setLocale={setLocale}
+          />
+        }
+      />
+      <AboutSection
+        current={current}
+        connectLinks={connectLinks}
+        trackedSectionRoutes={trackedSectionRoutes}
+        navigateToSection={navigateToSection}
+      />
       <section className="strip-section">
         {current.capabilities.map((item) => (
           <p className="js-capability" key={item}>
@@ -982,162 +511,20 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           </p>
         ))}
       </section>
-
-      <section className="content-section js-section" id="work">
-        <div className="section-heading">
-          <p className="eyebrow js-reveal">{current.labels.selectedWork}</p>
-          <h2 className="js-reveal">{current.projectsHeading}</h2>
-        </div>
-
-        <div className="project-list">
-          {current.featuredProjects.map((project, index) => (
-            <article className="project-row js-project-row" key={project.title}>
-              <p className="project-index">0{index + 1}</p>
-              <div className="project-body">
-                <div>
-                  <h3>{project.title}</h3>
-                  <p className="project-type project-type-under">
-                    {project.type}
-                  </p>
-                </div>
-                <div className="project-copy">
-                  <p className="project-summary">{project.summary}</p>
-                  <p className="project-impact">{project.impact}</p>
-                  <div className="project-links">
-                    {project.repoUrl ? (
-                      <a
-                        className="project-link"
-                        href={project.repoUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {current.labels.viewRepository}
-                      </a>
-                    ) : null}
-                    {project.liveUrl ? (
-                      <a
-                        className="project-link ghost"
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {current.labels.livePreview}
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="content-section js-section" id="skills">
-        <div className="section-heading">
-          <p className="eyebrow js-reveal">{current.labels.skills}</p>
-          <h2 className="js-reveal">{current.skillsHeading}</h2>
-        </div>
-
-        <div className="skills-grid">
-          {current.skillGroups.map((group, index) => (
-            <article className="skill-card js-reveal" key={group.title}>
-              <p className="skill-title">{group.title}</p>
-              <div className="skill-tags">
-                {sharedSkillItems[index]?.map((item) => (
-                  <span className="skill-tag" key={item}>
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="content-section js-section js-pipeline" id="pipeline">
-        <div className="section-heading">
-          <p className="eyebrow js-reveal">{current.labels.pipeline}</p>
-          <h2 className="js-reveal">{current.pipelineHeading}</h2>
-          <p className="detail-copy js-reveal">{current.pipelineDescription}</p>
-        </div>
-
-        <div className="pipeline">
-          <div className="pipeline-line">
-            <span className="progress-line js-progress-line" />
-          </div>
-
-          <div className="pipeline-grid">
-            {current.pipelineSteps.map((step) => (
-              <article className="pipeline-card js-reveal" key={step.title}>
-                <p className="pipeline-status">{step.status}</p>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="content-section js-section" id="engineering">
-        <div className="section-heading">
-          <p className="eyebrow js-reveal">{current.labels.engineering}</p>
-          <h2 className="js-reveal">{current.engineeringHeading}</h2>
-        </div>
-
-        <div className="split-layout">
-          <p className="detail-copy js-reveal">
-            {current.engineeringDescription}
-          </p>
-
-          <div className="upgrade-list">
-            {current.engineeringPoints.map((point) => (
-              <p className="js-reveal" key={point}>
-                {point}
-              </p>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="content-section contact-section js-section"
-        id="contact"
-      >
-        <div className="section-heading">
-          <p className="eyebrow js-reveal">{current.labels.nextPass}</p>
-          <h2 className="js-reveal">{current.contactHeading}</h2>
-        </div>
-
-        <div className="contact-panel js-reveal">
-          <p>{current.contactDescription}</p>
-
-          <div className="contact-links">
-            <a href={`mailto:${current.contactEmail}`}>
-              {current.contactEmail}
-            </a>
-            <a href={current.githubUrl} target="_blank" rel="noreferrer">
-              {current.labels.githubProfile}
-            </a>
-            <a href={current.linkedinUrl} target="_blank" rel="noreferrer">
-              {current.labels.connectWithMe}
-            </a>
-          </div>
-        </div>
-      </section>
-
+      <ProjectsSection current={current} />
+      <SkillsSection current={current} />
+      <PipelineSection current={current} />
+      <EngineeringSection current={current} />
+      <ContactSection current={current} />
       <footer className="portfolio-footer">
         <p>© Dinh Quoc Bao Khang {footerYear}. All rights reserved.</p>
       </footer>
-
       <button
         aria-label="Scroll to top"
         className={`scroll-top-button ${showScrollTop ? "is-visible" : ""}`}
         onClick={() => {
-          if (currentPath === trackedSectionRoutes.home) {
-            scrollToSection("home");
-            return;
-          }
-
+          if (currentPath === trackedSectionRoutes.home)
+            return scrollToSection("home");
           updateBrowserPath(trackedSectionRoutes.home);
           setCurrentPath(trackedSectionRoutes.home);
         }}
@@ -1145,68 +532,19 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       >
         <ArrowUpIcon />
       </button>
-
-      {isCvOpen || isCvPrimed ? (
-        <div
-          aria-hidden={!isCvOpen}
-          className={`cv-modal-overlay ${isCvOpen ? "is-open" : "is-preloaded"}`}
-          onClick={() => {
-            closeCv();
-          }}
-        >
-          <div
-            aria-label={current.labels.cvTitle}
-            aria-modal="true"
-            className="cv-modal"
-            onClick={(event) => {
-              event.stopPropagation();
-            }}
-            onKeyDown={(event) => {
-              if (event.key === " " || event.key === "Enter") {
-                event.stopPropagation();
-              }
-            }}
-            role="dialog"
-            tabIndex={-1}
-          >
-            <div className="cv-modal-header">
-              <div>
-                <p className="cv-modal-eyebrow">{current.labels.viewCv}</p>
-                <h3>{current.labels.cvTitle}</h3>
-              </div>
-
-              <button
-                aria-label={current.labels.close}
-                className="cv-close-button"
-                onClick={() => {
-                  closeCv();
-                }}
-                type="button"
-              >
-                <Cross2Icon />
-              </button>
-            </div>
-
-            <div className="cv-modal-body">
-              <CvPdfViewer
-                fileUrl={cvPath}
-                missingLabel={current.labels.cvMissing}
-              />
-            </div>
-
-            <div className="cv-modal-footer">
-              <button
-                className="cv-download-button"
-                onClick={handleDownload}
-                type="button"
-              >
-                <DownloadIcon />
-                <span>{current.labels.downloadCv}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <CvModal
+        isCvOpen={isCvOpen}
+        isCvPrimed={isCvPrimed}
+        cvPath={cvPath}
+        cvTitle={current.labels.cvTitle}
+        viewCvLabel={current.labels.viewCv}
+        closeLabel={current.labels.close}
+        cvMissingLabel={current.labels.cvMissing}
+        downloadLabel={current.labels.downloadCv}
+        onClose={closeCv}
+        onDownload={handleDownload}
+        CvPdfViewer={CvPdfViewer}
+      />
     </main>
   );
 }

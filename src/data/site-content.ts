@@ -7,6 +7,7 @@ export type LocalizedFeaturedProject = {
   impact: string;
   repoUrl?: string;
   liveUrl?: string;
+  visibility?: "public" | "private" | "confidential";
 };
 
 export type LocalizedSkillGroup = {
@@ -50,6 +51,9 @@ export type LocalizedContent = {
     nextPass: string;
     viewRepository: string;
     livePreview: string;
+    viewProject: string;
+    privateProject: string;
+    confidentialProject: string;
     githubProfile: string;
     connectWithMe: string;
     connect: string;
@@ -161,6 +165,9 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       nextPass: "Next pass",
       viewRepository: "View repository",
       livePreview: "Live preview",
+      viewProject: "View project",
+      privateProject: "Private project",
+      confidentialProject: "Confidential project",
       githubProfile: "GitHub profile",
       connectWithMe: "Connect with me",
       connect: "Connect",
@@ -240,16 +247,15 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       "Bilingual content switching between English and Vietnamese",
       "A clean path for GitHub-sourced projects, pinned selections, and private entries",
     ],
-    projectsHeading:
-      "Projects built end-to-end — from database design to production deployment.",
+    projectsHeading: "Projects built end-to-end for real production use.",
     featuredProjects: [
       {
         title: "Pacific Travel",
         type: "Fullstack Travel Booking Platform",
         summary:
-          "Full-stack tour booking platform with JWT auth, Redis caching, and payment gateway integration. Deployed to DigitalOcean VPS via Docker, Nginx, and GitHub Actions CI/CD. Integrated Google Gemini API for AI-powered travel recommendations.",
+          "Tour booking platform with JWT auth, Redis caching, payments, and CI/CD deployment.",
         impact:
-          "45% faster page load after SQL optimization and PostgreSQL + Supabase migration. Demonstrates end-to-end ownership from API design to production deployment.",
+          "Improved page speed by 45% after SQL optimization and PostgreSQL + Supabase migration.",
         repoUrl: "https://github.com/Khang1z2t/Pacific",
         liveUrl: "https://pacifictravel.id.vn/",
       },
@@ -257,18 +263,19 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         title: "BookStore",
         type: "Ecommerce Platform + Admin Workflow",
         summary:
-          "Full CRUD web app for book and order management with ReactJS frontend and Spring Boot backend. Integrated Keycloak for role-based access control and Camunda workflow engine for automated order processing.",
+          "CRUD bookstore app with ReactJS frontend and Spring Boot backend.",
         impact:
-          "Demonstrates ability to build both customer-facing storefront and internal admin tools within an enterprise-grade auth and workflow setup.",
+          "Integrated Keycloak RBAC and Camunda workflow for enterprise-style order processing.",
         repoUrl: "https://github.com/Khang1z2t/BookStore",
       },
       {
-        title: "ACB Bank E-Form System",
+        title: "ACB Internal E-Form & Approval System",
         type: "Enterprise Banking — Production Internship",
         summary:
-          "Maintained mission-critical digital banking e-form systems for ACB Bank on-site during a 9-month internship at FPT IS. Performed bug fixes, functional and regression testing, code reviews, and security patches under strict enterprise banking standards.",
+          "Maintained and improved ACB’s internal employee workflow platform for e-forms, approvals, and card-related operations. Started at FPT IS for 3 months, then transitioned to ACB for on-site delivery.",
         impact:
-          "Production-level exposure to high-stakes financial systems. Applied enterprise security practices alongside senior developers and QA in a regulated banking environment.",
+          "Contributed to maintenance and continuous improvements across reliability, process speed, and operational usability in a regulated banking environment.",
+        visibility: "confidential",
       },
     ],
     skillsHeading:
@@ -279,48 +286,45 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       { title: "Backend" },
       { title: "Data & tooling" },
     ],
-    pipelineHeading:
-      "A simple workflow for how I approach product and engineering work.",
+    pipelineHeading: "How I approach product and engineering work.",
     pipelineDescription:
-      "This section is about how I work, not how the portfolio is built. It shows the way I usually move from understanding a problem to shipping something reliable.",
+      "From understanding the problem to shipping a reliable product.",
     pipelineSteps: [
       {
         title: "Understand the problem",
         status: "Step 01",
         description:
-          "Clarify the product goal, technical constraints, and the real problem that needs to be solved before designing anything.",
+          "Clarify goals, constraints, and the real problem before coding.",
       },
       {
         title: "Design the system",
         status: "Step 02",
-        description:
-          "Shape the API flow, data model, service boundaries, and delivery plan so implementation has a clear direction.",
+        description: "Define API flow, data model, and service boundaries.",
       },
       {
         title: "Build end-to-end",
         status: "Step 03",
-        description:
-          "Implement the backend, connect the frontend, and make sure the product works as a complete system rather than isolated pieces.",
+        description: "Implement backend and frontend as one complete system.",
       },
       {
         title: "Test and refine",
         status: "Step 04",
         description:
-          "Review edge cases, improve reliability, and polish the final result so it is practical enough to ship and maintain.",
+          "Handle edge cases, improve reliability, and polish delivery.",
       },
     ],
     engineeringHeading: "Backend-first thinking, fullstack delivery.",
     engineeringDescription:
-      "I focus on the parts that make software actually work — secure auth flows, reliable APIs, and deployment pipelines that don't break. The frontend is there to serve clarity and usability, not the other way around.",
+      "I focus on the parts that make software dependable in production: secure auth flows, reliable APIs, and deployment pipelines that stay stable under change. Frontend decisions still follow user flow and business outcomes.",
     engineeringPoints: [
-      "I build production-ready APIs with Spring Boot, handling auth (JWT, Keycloak), data modeling, and service boundaries that can scale with the product.",
-      "Frontend work is driven by user flow and business goals — ReactJS for interaction, Tailwind for speed, and component structure that stays maintainable.",
-      "I've worked in real production environments: ACB Bank e-form systems, Docker-based deployments, GitHub Actions CI/CD, and DigitalOcean VPS.",
+      "Build production-ready Spring Boot APIs with JWT/Keycloak, clear service boundaries, and data models designed for long-term maintainability.",
+      "Use ReactJS + Tailwind to keep the frontend fast to iterate while staying aligned with real user journeys and product goals.",
+      "Hands-on production experience in banking systems, Docker-based deployments, and GitHub Actions CI/CD across real delivery cycles.",
     ],
     contactHeading:
       "Open to Junior Fullstack or Backend roles in Ho Chi Minh City.",
     contactDescription:
-      "I'm actively looking for a team where I can contribute from day one — whether that's building APIs, maintaining systems, or shipping features end-to-end. Feel free to reach out via email or connect on LinkedIn.",
+      "I'm looking for a team where I can contribute from day one in backend or fullstack delivery. Reach out via email or LinkedIn.",
     contactEmail: "khangbao3008@gmail.com",
     contactPhone: "0865399254",
     facebookUrl: "https://www.facebook.com/Yuno1z2t/",
@@ -353,6 +357,9 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       nextPass: "Bước tiếp theo",
       viewRepository: "Xem repository",
       livePreview: "Xem bản chạy",
+      viewProject: "Xem dự án",
+      privateProject: "Dự án nội bộ",
+      confidentialProject: "Dự án bảo mật",
       githubProfile: "Trang GitHub",
       connectWithMe: "Kết nối với tôi",
       connect: "Kết nối",
@@ -394,10 +401,10 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       ],
     },
     about: {
-      eyebrow: "Về mình",
-      heading: "Mình là Dinh Quoc Bao Khang",
+      eyebrow: "Về tôi",
+      heading: "Tôi là Đinh Quốc Bảo Khang",
       description:
-        "Mình là lập trình viên full-stack tại TP. Hồ Chí Minh, tập trung mạnh vào backend, thiết kế API và xây dựng sản phẩm có thể triển khai thực tế từ đầu đến cuối. Mình thích làm những hệ thống ổn định, bảo mật và thực sự hữu ích trong môi trường production.",
+        "Tôi là lập trình viên full-stack tại TP. Hồ Chí Minh, tập trung mạnh vào backend, thiết kế API và xây dựng sản phẩm có thể triển khai thực tế từ đầu đến cuối. Tôi thích làm những hệ thống ổn định, bảo mật và thực sự hữu ích trong môi trường production.",
       facts: [
         { label: "Địa điểm", value: "TP. Hồ Chí Minh, Việt Nam" },
         { label: "Kinh nghiệm", value: "1+ năm" },
@@ -426,16 +433,15 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
       "Chuyển đổi nội dung song ngữ giữa tiếng Anh và tiếng Việt",
       "Có sẵn hướng mở rộng để lấy project từ GitHub, ghim dự án và thêm entry private",
     ],
-    projectsHeading:
-      "Các project xây từ đầu đến cuối — từ thiết kế database đến deploy production.",
+    projectsHeading: "Các project fullstack triển khai cho môi trường thực tế.",
     featuredProjects: [
       {
         title: "Pacific Travel",
         type: "Nền tảng đặt tour du lịch fullstack",
         summary:
-          "Nền tảng đặt tour với JWT auth, Redis caching và tích hợp cổng thanh toán. Deploy lên DigitalOcean VPS qua Docker, Nginx và GitHub Actions CI/CD. Tích hợp Google Gemini API để gợi ý tour bằng AI.",
+          "Nền tảng đặt tour với JWT auth, Redis caching, thanh toán và CI/CD.",
         impact:
-          "Tải trang nhanh hơn 45% sau khi tối ưu SQL và chuyển sang PostgreSQL + Supabase. Thể hiện khả năng làm chủ toàn bộ luồng từ thiết kế API đến production.",
+          "Tăng tốc độ tải 45% sau tối ưu SQL và chuyển PostgreSQL + Supabase.",
         repoUrl: "https://github.com/Khang1z2t/Pacific",
         liveUrl: "https://pacifictravel.id.vn/",
       },
@@ -443,18 +449,19 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         title: "BookStore",
         type: "Nền tảng thương mại + quy trình admin",
         summary:
-          "Web app CRUD đầy đủ cho quản lý sách và đơn hàng với ReactJS frontend và Spring Boot backend. Tích hợp Keycloak phân quyền và Camunda workflow engine để tự động hóa xử lý đơn.",
+          "Web app CRUD quản lý sách/đơn với ReactJS frontend và Spring Boot backend.",
         impact:
-          "Chứng minh khả năng xây cả giao diện người dùng lẫn công cụ quản trị nội bộ trong một hệ thống xác thực và workflow chuẩn enterprise.",
+          "Tích hợp Keycloak phân quyền và Camunda workflow theo hướng enterprise.",
         repoUrl: "https://github.com/Khang1z2t/BookStore",
       },
       {
-        title: "Hệ thống E-Form ACB Bank",
+        title: "Hệ thống E-Form & Phê duyệt nội bộ ACB",
         type: "Thực tập production tại ngân hàng doanh nghiệp",
         summary:
-          "Bảo trì hệ thống e-form ngân hàng điện tử của ACB Bank trong 9 tháng thực tập tại FPT IS. Sửa lỗi, kiểm thử chức năng và hồi quy, review code và vá bảo mật theo tiêu chuẩn banking enterprise.",
+          "Bảo trì và cải tiến nền tảng workflow nội bộ cho e-form, phê duyệt và nghiệp vụ liên quan thẻ tại ACB. Bắt đầu 3 tháng tại FPT IS, sau đó được điều qua ACB làm on-site.",
         impact:
-          "Tiếp xúc với hệ thống tài chính thực tế yêu cầu cao. Áp dụng quy trình bảo mật doanh nghiệp cùng senior developer và đội QA trong môi trường banking được kiểm soát chặt.",
+          "Đóng góp cho cả vận hành và cải tiến liên tục về độ ổn định, tốc độ xử lý quy trình và khả năng sử dụng trong môi trường banking được kiểm soát.",
+        visibility: "confidential",
       },
     ],
     skillsHeading: "Tư duy backend làm gốc, kỹ năng fullstack làm đầu ra.",
@@ -496,11 +503,11 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     ],
     engineeringHeading: "Tư duy backend-first, làm chủ toàn bộ fullstack.",
     engineeringDescription:
-      "Mình tập trung vào phần làm cho phần mềm thực sự chạy được — luồng xác thực bảo mật, API ổn định, và pipeline deploy không gãy. Frontend là để phục vụ trải nghiệm và mục tiêu sản phẩm, không phải ngược lại.",
+      "Mình tập trung vào những phần quyết định độ tin cậy khi chạy production: auth flow bảo mật, API ổn định, và pipeline triển khai chịu được thay đổi. Frontend vẫn đi theo user flow và mục tiêu sản phẩm để trải nghiệm nhất quán.",
     engineeringPoints: [
-      "Xây API production-ready bằng Spring Boot — xử lý auth (JWT, Keycloak), thiết kế dữ liệu và ranh giới service đủ linh hoạt để mở rộng theo sản phẩm.",
-      "Frontend được xây theo luồng người dùng và mục tiêu nghiệp vụ — ReactJS cho tương tác, Tailwind cho tốc độ, cấu trúc component dễ bảo trì lâu dài.",
-      "Đã làm trong môi trường production thực tế: hệ thống e-form ACB Bank, deploy bằng Docker, CI/CD với GitHub Actions, VPS DigitalOcean.",
+      "Xây API Spring Boot theo hướng production với JWT/Keycloak, service boundary rõ ràng và mô hình dữ liệu ưu tiên khả năng bảo trì dài hạn.",
+      "Làm frontend bằng ReactJS + Tailwind để vừa linh hoạt khi phát triển, vừa bám sát hành vi người dùng và mục tiêu kinh doanh.",
+      "Có kinh nghiệm production thực tế trong hệ thống ngân hàng, deploy bằng Docker, và vận hành quy trình GitHub Actions CI/CD qua nhiều vòng phát hành.",
     ],
     contactHeading:
       "Đang tìm kiếm vị trí Junior Fullstack hoặc Backend tại TP. Hồ Chí Minh.",

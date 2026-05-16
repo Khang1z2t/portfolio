@@ -53,21 +53,30 @@ a {
   overflow-x: clip;
   min-height: 100vh;
   background:
+    radial-gradient(circle at 18% 8%, rgba(255, 122, 26, 0.05), transparent 36%),
     radial-gradient(
-      circle at 12% 12%,
-      rgba(255, 122, 26, 0.18),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 84% 16%,
-      rgba(102, 216, 255, 0.12),
-      transparent 24%
-    ),
-    radial-gradient(
-      circle at 68% 76%,
-      rgba(110, 76, 255, 0.12),
-      transparent 26%
-    ), linear-gradient(180deg, #080a0f 0%, #10131b 38%, #171c28 100%);
+      circle at 82% 92%,
+      rgba(102, 216, 255, 0.04),
+      transparent 34%
+    ), linear-gradient(180deg, #0a0c11 0%, #0d1118 50%, #101722 100%);
+}
+
+.portfolio-shell::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.36;
+  pointer-events: none;
+  content: "";
+}
+
+.portfolio-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 @supports (min-height: 100dvh) {
@@ -344,25 +353,25 @@ a {
 .hero-glow {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(96px);
-  opacity: 0.8;
+  filter: blur(110px);
+  opacity: 0.42;
   pointer-events: none;
 }
 
 .hero-glow-left {
-  top: 5rem;
-  left: -6rem;
-  width: 22rem;
-  height: 22rem;
-  background: rgba(255, 122, 26, 0.24);
+  top: 7rem;
+  left: -7rem;
+  width: 18rem;
+  height: 18rem;
+  background: rgba(255, 122, 26, 0.12);
 }
 
 .hero-glow-right {
-  right: -6rem;
-  bottom: 5rem;
-  width: 24rem;
-  height: 24rem;
-  background: rgba(102, 216, 255, 0.16);
+  right: -7rem;
+  bottom: 7rem;
+  width: 19rem;
+  height: 19rem;
+  background: rgba(102, 216, 255, 0.08);
 }
 
 .hero-noise {
@@ -658,8 +667,8 @@ a {
   max-width: 34rem;
   margin: 1.5rem 0 0;
   color: var(--muted);
-  font-size: clamp(1rem, 2vw, 1.16rem);
-  line-height: 1.85;
+  font-size: clamp(0.98rem, 1.7vw, 1.08rem);
+  line-height: 1.75;
 }
 
 .hero-actions {
@@ -732,18 +741,12 @@ a {
   gap: 1rem;
   min-height: 32rem;
   padding: 1.2rem;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(244, 239, 230, 0.1);
   border-radius: 2rem;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 100%),
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.03),
-      rgba(255, 255, 255, 0.02)
-    );
-  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(14px);
   transform-origin: center top;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
 }
 
 .panel-caption {
@@ -792,9 +795,10 @@ a {
 
 .ring {
   position: absolute;
-  border: 1px solid rgba(244, 239, 230, 0.14);
+  border: 1px solid rgba(244, 239, 230, 0.08);
   border-radius: 9999px;
-  will-change: transform;
+  will-change: auto;
+  opacity: 0.45;
 }
 
 .ring-large {
@@ -813,17 +817,7 @@ a {
 }
 
 .scan-line {
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(102, 216, 255, 0.9),
-    transparent
-  );
-  box-shadow: 0 0 18px rgba(102, 216, 255, 0.5);
+  display: none;
 }
 
 .panel-stack {
@@ -1090,21 +1084,22 @@ a {
 }
 
 .content-section {
-  padding: 4rem 0;
+  padding: 4.4rem 0;
 }
 
 .section-heading {
   display: grid;
-  gap: 0.8rem;
-  margin-bottom: 2.2rem;
+  gap: 0.7rem;
+  margin-bottom: 2.4rem;
 }
 
 .section-heading h2 {
-  max-width: 14ch;
+  width: min(66%, 24ch);
+  max-width: 100%;
   margin: 0;
-  font-size: clamp(2rem, 4.8vw, 4.25rem);
-  line-height: 0.98;
-  letter-spacing: -0.05em;
+  font-size: clamp(1.74rem, 4vw, 3.45rem);
+  line-height: 1.03;
+  letter-spacing: -0.04em;
 }
 
 .project-list {
@@ -1189,6 +1184,20 @@ a {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.project-status-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--soft);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .project-summary,
 .project-impact,
 .detail-copy,
@@ -1197,8 +1206,8 @@ a {
 .contact-panel p {
   margin: 0;
   color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 0.98rem;
+  line-height: 1.75;
 }
 
 .project-impact {
@@ -1285,7 +1294,7 @@ a {
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
@@ -1836,123 +1845,174 @@ a {
 @media (max-width: 767px) {
   .hero-section[id],
   .content-section[id] {
-    scroll-margin-top: 4.15rem;
+    scroll-margin-top: 4.1rem;
   }
 
-  .topbar--hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.7rem 0.85rem;
+  .content-section {
+    padding: 3.4rem 0;
   }
 
-  .intro-title {
-    max-width: 8.5ch;
+  .section-heading {
+    gap: 0.58rem;
+    margin-bottom: 1.9rem;
   }
 
-  .topbar-shell {
-    top: 0.35rem;
-    padding: 0 0.75rem;
+  .section-heading h2 {
+    width: 100%;
+    max-width: 12ch;
+    font-size: clamp(1.52rem, 7.1vw, 2.02rem);
+    line-height: 1.08;
   }
 
-  .topbar--hero .brand-mark {
+  .project-copy,
+  .about-copy,
+  .detail-copy {
+    max-width: 34ch;
+  }
+
+  .project-summary,
+  .project-impact,
+  .detail-copy,
+  .upgrade-list p,
+  .pipeline-card p,
+  .contact-panel p {
+    font-size: 0.95rem;
+    line-height: 1.68;
+  }
+
+  .button-primary,
+  .button-secondary {
+    min-height: 2.8rem;
+    padding: 0.72rem 1.05rem;
+    font-size: 0.9rem;
+  }
+
+  .hero-actions {
+    gap: 0.7rem;
+    margin-top: 1.45rem;
+  }
+
+  .hero-note {
+    margin-top: 1.15rem;
+    gap: 0.62rem;
+  }
+
+  .hero-note span {
     font-size: 0.82rem;
-    letter-spacing: 0.24em;
+    padding: 0.4rem 0.66rem;
   }
 
-  .topbar--hero .topbar-actions,
-  .topbar--sticky .topbar-actions {
-    display: contents;
+  .about-card,
+  .pipeline-card,
+  .skill-card,
+  .contact-panel {
+    padding: 1.05rem;
+    border-radius: 1.2rem;
   }
 
-  .topbar--sticky {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.65rem 0.8rem;
-    padding: 0.72rem 0.82rem;
-    border-radius: 1rem;
+  .strip-section p {
+    padding: 0.85rem 0;
+    font-size: 0.9rem;
   }
 
-  .topbar--sticky .brand-mark {
-    font-size: 0.82rem;
-    letter-spacing: 0.22em;
+  .contact-section {
+    padding-bottom: 4.8rem;
+  }
+
+  .portfolio-footer {
+    padding-bottom: 4.6rem;
   }
 
   .topbar--hero .topnav,
   .topbar--sticky .topnav {
-    grid-column: 1 / -1;
-    flex-wrap: nowrap;
-    gap: 0.85rem;
-    width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-    font-size: 0.8rem;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-    padding-bottom: 0.08rem;
-  }
-
-  .topbar--hero .topnav::-webkit-scrollbar,
-  .topbar--sticky .topnav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .topbar--hero .locale-picker,
-  .topbar--sticky .locale-picker {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    align-self: center;
-  }
-
-  .topbar--hero .locale-trigger,
-  .topbar--sticky .locale-trigger {
-    min-width: 3.55rem;
-    min-height: 2.05rem;
-    padding: 0.34rem 0.62rem;
-    font-size: 0.74rem;
+    gap: 0.75rem;
+    font-size: 0.78rem;
   }
 
   .topbar--hero .topnav a,
   .topbar--sticky .topnav a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.9rem;
+    min-height: 1.75rem;
   }
 
-  .topnav .nav-label-desktop {
-    display: none;
-  }
-
-  .topnav .nav-label-mobile {
-    display: inline;
+  .topbar--hero .locale-trigger,
+  .topbar--sticky .locale-trigger {
+    min-width: 3.45rem;
+    min-height: 1.95rem;
+    padding: 0.3rem 0.56rem;
+    font-size: 0.72rem;
   }
 
   .hero-grid {
-    padding-top: 2.1rem;
+    padding-top: 1.9rem;
+    gap: 1.8rem;
   }
 
-  .connect-content {
-    min-width: min(16.5rem, calc(100vw - 2rem));
+  .hero-summary {
+    margin-top: 1.2rem;
   }
 
-  .portfolio-footer {
-    padding-bottom: 5.2rem;
+  .hero-heading {
+    max-width: 9.5ch;
   }
 
-  .eyebrow {
-    max-width: 18rem;
-    padding-right: 0.75rem;
-    line-height: 1.5;
+  .hero-rotating {
+    margin-top: 0.95rem;
+  }
+
+  .cv-modal-header h3 {
+    font-size: 1.05rem;
+  }
+
+  .cv-download-button {
+    min-height: 2.7rem;
+    padding: 0.62rem 0.9rem;
+  }
+
+  .scroll-top-button {
+    right: 0.82rem;
+    bottom: 0.82rem;
+    width: 2.72rem;
+    height: 2.72rem;
+  }
+
+  .scroll-top-button svg {
+    width: 0.96rem;
+    height: 0.96rem;
+  }
+
+  .hero-noise {
+    opacity: 0.52;
+  }
+
+  .hero-glow-left,
+  .hero-glow-right {
+    opacity: 0.34;
   }
 
   .panel-caption {
     flex-direction: column;
   }
 
-  .hero-heading {
-    max-width: 10ch;
+  .connect-content {
+    min-width: min(16.5rem, calc(100vw - 2rem));
+  }
+
+  .cv-modal {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0.9rem;
+  }
+
+  .cv-frame,
+  .cv-empty-state,
+  .cv-document-shell {
+    height: 72vh;
+  }
+
+  .eyebrow {
+    max-width: 18rem;
+    padding-right: 0.75rem;
+    line-height: 1.5;
   }
 
   .hero-rotating {
