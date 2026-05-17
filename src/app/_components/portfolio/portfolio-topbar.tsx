@@ -131,7 +131,10 @@ export function PortfolioTopbar({
               <Select.Content
                 className="locale-content"
                 position="popper"
-                sideOffset={10}
+                side="bottom"
+                align="end"
+                sideOffset={6}
+                alignOffset={0}
               >
                 <Select.Viewport className="locale-viewport">
                   {localeOptions.map((option) => (

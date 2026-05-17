@@ -85,11 +85,13 @@ const pathToSectionId: Record<string, keyof typeof trackedSectionRoutes> = {
   "/cv": "cv",
 };
 const scrollToSection = (sectionId: string) => {
-  if (sectionId === "home")
-    return window.scrollTo({ top: 0, behavior: "smooth" });
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
+  if (sectionId === "home") return window.scrollTo({ top: 0, behavior });
   document
     .getElementById(sectionId)
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    ?.scrollIntoView({ behavior, block: "start" });
 };
 const updateBrowserPath = (path: string) => {
   if (window.location.pathname !== path) window.history.pushState({}, "", path);
@@ -168,6 +170,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [isCvPrimed, setIsCvPrimed] = useState(false);
   const [resolvedCvPath, setResolvedCvPath] = useState(cvPath);
   const [currentPath, setCurrentPath] = useState(initialPathname);
+  const warmUpTriggeredRef = useRef(false);
   const lastNonCvPathRef = useRef(
     initialPathname === trackedSectionRoutes.cv
       ? trackedSectionRoutes.home
@@ -265,34 +268,21 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   useEffect(() => {
     let isCancelled = false;
     const runWarmUp = async () => {
+      if (warmUpTriggeredRef.current) return;
+      warmUpTriggeredRef.current = true;
       const versionedPath = await resolveVersionedCvPath();
       if (isCancelled) return;
       setResolvedCvPath(versionedPath);
       warmUpCvAssets(versionedPath);
       setIsCvPrimed(true);
     };
-    if ("requestIdleCallback" in globalThis) {
-      const idleId = globalThis.requestIdleCallback(
-        () => {
-          void runWarmUp();
-        },
-        {
-          timeout: 2500,
-        },
-      );
-      return () => {
-        isCancelled = true;
-        globalThis.cancelIdleCallback(idleId);
-      };
-    }
-    const timeoutId = globalThis.setTimeout(() => {
-      void runWarmUp();
-    }, 1200);
+    if (!isCvOpen) return;
+    void runWarmUp();
     return () => {
       isCancelled = true;
-      globalThis.clearTimeout(timeoutId);
     };
-  }, []);
+  }, [isCvOpen]);
+
   useEffect(() => {
     if (!isCvOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -328,14 +318,17 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     requestAnimationFrame(() => scrollToSection(section));
   }, [currentPath]);
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 280);
+    let rafId = 0;
+    const updateFromScroll = () => {
+      const nextShowScrollTop = window.scrollY > 280;
+      setShowScrollTop((prev) =>
+        prev === nextShowScrollTop ? prev : nextShowScrollTop,
+      );
       const aboutSection = document.getElementById("about");
-      if (!aboutSection) {
-        setShowStickyHeader(false);
-      } else {
-        setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
-      }
+      const nextSticky = aboutSection
+        ? window.scrollY >= aboutSection.offsetTop / 2
+        : false;
+      setShowStickyHeader((prev) => (prev === nextSticky ? prev : nextSticky));
 
       if (window.location.pathname === trackedSectionRoutes.cv) return;
       const activeSection = resolveActiveSectionFromScroll();
@@ -347,9 +340,19 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       }
       replaceBrowserPath(nextPath);
     };
-    handleScroll();
+    const handleScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        updateFromScroll();
+      });
+    };
+    updateFromScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, [currentPath]);
   useGSAP(
     () => {

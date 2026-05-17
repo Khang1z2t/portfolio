@@ -147,13 +147,17 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
     brand: "KHANG",
     nav: {
       about: "About",
+      aboutShort: "About",
       work: "Work",
+      workShort: "Work",
       skills: "Skills",
+      skillsShort: "Skills",
       pipeline: "How I work",
-      // pipelineShort: "Pipeline",
+      pipelineShort: "Flow",
       engineering: "Engineering",
       engineeringShort: "Mindset",
       contact: "Contact",
+      contactShort: "Contact",
     },
     labels: {
       language: "Language",
