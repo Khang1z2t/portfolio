@@ -48,6 +48,28 @@ a {
   color: var(--foreground);
 }
 
+:where(
+    a,
+    button,
+    [role="button"],
+    [tabindex]:not([tabindex="-1"]),
+    .locale-trigger,
+    .locale-item,
+    .project-link,
+    .cv-close-button,
+    .cv-download-button,
+    .cv-zoom-button,
+    .cv-fit-button,
+    .cv-pagination button,
+    .scroll-top-button
+  ):focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 2px rgba(11, 13, 18, 0.9),
+    0 0 0 5px rgba(102, 216, 255, 0.32);
+}
+
 .portfolio-shell {
   position: relative;
   overflow-x: clip;

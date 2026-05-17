@@ -34,6 +34,33 @@ const localeStorageKey = "portfolio-locale";
 const cvPath =
   "https://joxnjprclihzcjvagyuz.supabase.co/storage/v1/object/public/portfolio/resume/DinhQuocBaoKhang_CV.pdf";
 const cvDownloadName = `DinhQuocBaoKhang_SoftwareDeveloper_${new Date().getFullYear()}.pdf`;
+const buildVersionedCvPath = (version: string | null) => {
+  if (!version) return cvPath;
+  const url = new URL(cvPath);
+  url.searchParams.set("v", version);
+  return url.toString();
+};
+const readCvVersionFromResponse = (response: Response) => {
+  const etag = response.headers.get("etag")?.replaceAll('"', "").trim();
+  if (etag) return etag;
+  const lastModified = response.headers.get("last-modified");
+  if (!lastModified) return null;
+  const timestamp = Date.parse(lastModified);
+  return Number.isNaN(timestamp) ? null : String(timestamp);
+};
+const resolveVersionedCvPath = async () => {
+  try {
+    const headResponse = await fetch(cvPath, {
+      method: "HEAD",
+      cache: "no-store",
+    });
+    if (!headResponse.ok) return cvPath;
+    const version = readCvVersionFromResponse(headResponse);
+    return buildVersionedCvPath(version);
+  } catch {
+    return cvPath;
+  }
+};
 const cvPreloadLinkId = "portfolio-cv-preload";
 const cvSupabasePreconnectId = "portfolio-cv-supabase-preconnect";
 const cvWorkerPreconnectId = "portfolio-cv-worker-preconnect";
@@ -67,7 +94,31 @@ const scrollToSection = (sectionId: string) => {
 const updateBrowserPath = (path: string) => {
   if (window.location.pathname !== path) window.history.pushState({}, "", path);
 };
-const warmUpCvAssets = () => {
+const replaceBrowserPath = (path: string) => {
+  if (window.location.pathname !== path)
+    window.history.replaceState({}, "", path);
+};
+const trackedScrollSections: Array<
+  Exclude<keyof typeof trackedSectionRoutes, "cv">
+> = ["home", "about", "work", "skills", "pipeline", "engineering", "contact"];
+const resolveActiveSectionFromScroll = () => {
+  const scrollY = window.scrollY;
+  const viewportOffset = Math.max(window.innerHeight * 0.24, 120);
+  const homeThreshold = 80;
+  if (scrollY <= homeThreshold) return "home" as const;
+
+  let activeSection: Exclude<keyof typeof trackedSectionRoutes, "cv"> = "home";
+  for (const section of trackedScrollSections) {
+    if (section === "home") continue;
+    const sectionNode = document.getElementById(section);
+    if (!sectionNode) continue;
+    if (sectionNode.offsetTop - viewportOffset <= scrollY) {
+      activeSection = section;
+    }
+  }
+  return activeSection;
+};
+const warmUpCvAssets = (resolvedCvPath: string) => {
   void loadCvPdfViewer();
   if (!document.getElementById(cvSupabasePreconnectId)) {
     const link = document.createElement("link");
@@ -85,17 +136,22 @@ const warmUpCvAssets = () => {
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
   }
-  if (!document.getElementById(cvPreloadLinkId)) {
+  const preloadLink = document.getElementById(
+    cvPreloadLinkId,
+  ) as HTMLLinkElement | null;
+  if (!preloadLink) {
     const link = document.createElement("link");
     link.id = cvPreloadLinkId;
     link.rel = "prefetch";
     link.as = "fetch";
-    link.href = cvPath;
+    link.href = resolvedCvPath;
     link.type = "application/pdf";
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
+  } else if (preloadLink.href !== resolvedCvPath) {
+    preloadLink.href = resolvedCvPath;
   }
-  void fetch(cvPath, { cache: "force-cache", mode: "cors" }).catch(
+  void fetch(resolvedCvPath, { cache: "force-cache", mode: "cors" }).catch(
     () => undefined,
   );
 };
@@ -110,6 +166,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [isCvOpen, setIsCvOpen] = useState(false);
   const [isCvPrimed, setIsCvPrimed] = useState(false);
+  const [resolvedCvPath, setResolvedCvPath] = useState(cvPath);
   const [currentPath, setCurrentPath] = useState(initialPathname);
   const lastNonCvPathRef = useRef(
     initialPathname === trackedSectionRoutes.cv
@@ -117,6 +174,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       : initialPathname,
   );
   const skipNextPathScrollRef = useRef(false);
+  const skipNextSectionScrollRef = useRef(false);
   const current = content[locale];
   const footerYear = new Date().getFullYear();
   const contactPhoneHref = `tel:+84${current.contactPhone.replace(/^0/, "")}`;
@@ -205,18 +263,35 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     window.localStorage.setItem(localeStorageKey, locale);
   }, [locale]);
   useEffect(() => {
-    const runWarmUp = () => {
-      warmUpCvAssets();
+    let isCancelled = false;
+    const runWarmUp = async () => {
+      const versionedPath = await resolveVersionedCvPath();
+      if (isCancelled) return;
+      setResolvedCvPath(versionedPath);
+      warmUpCvAssets(versionedPath);
       setIsCvPrimed(true);
     };
     if ("requestIdleCallback" in globalThis) {
-      const idleId = globalThis.requestIdleCallback(runWarmUp, {
-        timeout: 2500,
-      });
-      return () => globalThis.cancelIdleCallback(idleId);
+      const idleId = globalThis.requestIdleCallback(
+        () => {
+          void runWarmUp();
+        },
+        {
+          timeout: 2500,
+        },
+      );
+      return () => {
+        isCancelled = true;
+        globalThis.cancelIdleCallback(idleId);
+      };
     }
-    const timeoutId = globalThis.setTimeout(runWarmUp, 1200);
-    return () => globalThis.clearTimeout(timeoutId);
+    const timeoutId = globalThis.setTimeout(() => {
+      void runWarmUp();
+    }, 1200);
+    return () => {
+      isCancelled = true;
+      globalThis.clearTimeout(timeoutId);
+    };
   }, []);
   useEffect(() => {
     if (!isCvOpen) return;
@@ -246,19 +321,36 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       skipNextPathScrollRef.current = false;
       return;
     }
+    if (skipNextSectionScrollRef.current) {
+      skipNextSectionScrollRef.current = false;
+      return;
+    }
     requestAnimationFrame(() => scrollToSection(section));
   }, [currentPath]);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 280);
       const aboutSection = document.getElementById("about");
-      if (!aboutSection) return setShowStickyHeader(false);
-      setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
+      if (!aboutSection) {
+        setShowStickyHeader(false);
+      } else {
+        setShowStickyHeader(window.scrollY >= aboutSection.offsetTop / 2);
+      }
+
+      if (window.location.pathname === trackedSectionRoutes.cv) return;
+      const activeSection = resolveActiveSectionFromScroll();
+      const nextPath = trackedSectionRoutes[activeSection];
+      if (currentPath !== nextPath) {
+        skipNextSectionScrollRef.current = true;
+        lastNonCvPathRef.current = nextPath;
+        setCurrentPath(nextPath);
+      }
+      replaceBrowserPath(nextPath);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [currentPath]);
   useGSAP(
     () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -454,7 +546,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     { dependencies: [locale], revertOnUpdate: true, scope: root },
   );
   const handleDownload = async () => {
-    const response = await fetch(cvPath);
+    const response = await fetch(resolvedCvPath);
     if (!response.ok)
       throw new Error(`Failed to download CV: ${response.status}`);
     const blob = await response.blob();
@@ -535,7 +627,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       <CvModal
         isCvOpen={isCvOpen}
         isCvPrimed={isCvPrimed}
-        cvPath={cvPath}
+        cvPath={resolvedCvPath}
         cvTitle={current.labels.cvTitle}
         viewCvLabel={current.labels.viewCv}
         closeLabel={current.labels.close}
