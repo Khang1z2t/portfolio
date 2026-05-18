@@ -8,6 +8,9 @@ export type LocalizedFeaturedProject = {
   repoUrl?: string;
   liveUrl?: string;
   visibility?: "public" | "private" | "confidential";
+  techStack?: string[];
+  previewImage?: string;
+  previewAlt?: string;
 };
 
 export type LocalizedSkillGroup = {
@@ -262,6 +265,17 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
           "Improved page speed by 45% after SQL optimization and PostgreSQL + Supabase migration.",
         repoUrl: "https://github.com/Khang1z2t/Pacific",
         liveUrl: "https://pacifictravel.id.vn/",
+        previewImage: "/projects/pacific-preview.png",
+        previewAlt: "Pacific Travel project preview",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "ReactJS",
+          "PostgreSQL",
+          "Redis",
+          "Docker",
+          "CI/CD",
+        ],
       },
       {
         title: "BookStore",
@@ -271,6 +285,16 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         impact:
           "Integrated Keycloak RBAC and Camunda workflow for enterprise-style order processing.",
         repoUrl: "https://github.com/Khang1z2t/BookStore",
+        previewImage: "/projects/bookstore-placeholder.svg",
+        previewAlt: "BookStore project preview",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "ReactJS",
+          "Keycloak",
+          "Camunda",
+          "JWT",
+        ],
       },
       {
         title: "ACB Internal E-Form & Approval System",
@@ -280,6 +304,13 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         impact:
           "Contributed to maintenance and continuous improvements across reliability, process speed, and operational usability in a regulated banking environment.",
         visibility: "confidential",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "Oracle DB",
+          "Workflow Engine",
+          "Spring Security",
+        ],
       },
     ],
     skillsHeading:
@@ -448,6 +479,17 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
           "Tăng tốc độ tải 45% sau tối ưu SQL và chuyển PostgreSQL + Supabase.",
         repoUrl: "https://github.com/Khang1z2t/Pacific",
         liveUrl: "https://pacifictravel.id.vn/",
+        previewImage: "/projects/pacific-placeholder.svg",
+        previewAlt: "Pacific Travel project preview",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "ReactJS",
+          "PostgreSQL",
+          "Redis",
+          "Docker",
+          "CI/CD",
+        ],
       },
       {
         title: "BookStore",
@@ -457,6 +499,16 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         impact:
           "Tích hợp Keycloak phân quyền và Camunda workflow theo hướng enterprise.",
         repoUrl: "https://github.com/Khang1z2t/BookStore",
+        previewImage: "/projects/bookstore-placeholder.svg",
+        previewAlt: "BookStore project preview",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "ReactJS",
+          "Keycloak",
+          "Camunda",
+          "JWT",
+        ],
       },
       {
         title: "Hệ thống E-Form & Phê duyệt nội bộ ACB",
@@ -466,6 +518,13 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         impact:
           "Đóng góp cho cả vận hành và cải tiến liên tục về độ ổn định, tốc độ xử lý quy trình và khả năng sử dụng trong môi trường banking được kiểm soát.",
         visibility: "confidential",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "Oracle DB",
+          "Workflow Engine",
+          "Spring Security",
+        ],
       },
     ],
     skillsHeading: "Tư duy backend làm gốc, kỹ năng fullstack làm đầu ra.",
