@@ -6,6 +6,7 @@ Read these files before making code changes:
 2. `docs/architecture.md`
 3. `docs/convention.md`
 4. `docs/rule.md`
+5. `docs/session-handoff.md`
 
 Use `docs/convention.md` as the shared working rules for all coding agents in this repo.
 Use `docs/rule.md` as the hard safety guardrail for risky changes.

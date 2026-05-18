@@ -12,6 +12,7 @@ Before editing code in this repository, read these files first:
 2. `docs/architecture.md`
 3. `docs/convention.md`
 4. `docs/rule.md`
+5. `docs/session-handoff.md`
 
 Use those docs as the shared source of truth before making changes.
 
