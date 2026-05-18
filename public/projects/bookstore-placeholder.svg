@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" fill="none">
+  <rect width="1200" height="720" fill="#0b0d12"/>
+  <rect x="40" y="40" width="1120" height="640" rx="24" fill="url(#g)" fill-opacity="0.16"/>
+  <text x="600" y="340" fill="#f4efe6" font-size="46" text-anchor="middle" font-family="Segoe UI, sans-serif" letter-spacing="2">BOOKSTORE</text>
+  <text x="600" y="390" fill="#ffb074" font-size="20" text-anchor="middle" font-family="Cascadia Code, monospace">Preview Placeholder</text>
+  <defs>
+    <linearGradient id="g" x1="40" y1="40" x2="1160" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff7a1a"/>
+      <stop offset="1" stop-color="#66d8ff"/>
+    </linearGradient>
+  </defs>
+</svg>
