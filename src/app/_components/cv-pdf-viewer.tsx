@@ -10,6 +10,8 @@ const defaultScale = 1;
 const minScale = 0.8;
 const maxScale = 1.8;
 const scaleStep = 0.1;
+const wheelScaleStep = 0.05;
+const renderScaleThreshold = 0.04;
 
 type CvPdfViewerProps = {
   fileUrl: string;
@@ -21,6 +23,7 @@ export function CvPdfViewer({ fileUrl, missingLabel }: CvPdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(defaultScale);
+  const [renderScale, setRenderScale] = useState(defaultScale);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   useEffect(() => {
@@ -29,8 +32,30 @@ export function CvPdfViewer({ fileUrl, missingLabel }: CvPdfViewerProps) {
       return;
     }
 
+    let rafId = 0;
+    let wheelDelta = 0;
+
     const updateWidth = () => {
       setContainerWidth(node.clientWidth);
+    };
+
+    const flushZoom = () => {
+      rafId = 0;
+      if (wheelDelta === 0) return;
+      const direction = wheelDelta < 0 ? 1 : -1;
+      wheelDelta = 0;
+      setScale((value) => {
+        const next = Number((value + direction * wheelScaleStep).toFixed(2));
+        return Math.min(maxScale, Math.max(minScale, next));
+      });
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      wheelDelta += event.deltaY;
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(flushZoom);
     };
 
     updateWidth();
@@ -40,9 +65,12 @@ export function CvPdfViewer({ fileUrl, missingLabel }: CvPdfViewerProps) {
     });
 
     observer.observe(node);
+    node.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
       observer.disconnect();
+      node.removeEventListener("wheel", handleWheel);
+      if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -52,8 +80,16 @@ export function CvPdfViewer({ fileUrl, missingLabel }: CvPdfViewerProps) {
     setScale(defaultScale);
   }, []);
 
+  useEffect(() => {
+    if (Math.abs(scale - renderScale) < renderScaleThreshold) return;
+    const timer = window.setTimeout(() => {
+      setRenderScale(scale);
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [scale, renderScale]);
+
   const pageWidth =
-    containerWidth > 0 ? Math.round(containerWidth * scale) : undefined;
+    containerWidth > 0 ? Math.round(containerWidth * renderScale) : undefined;
 
   return (
     <div className="cv-document-shell">

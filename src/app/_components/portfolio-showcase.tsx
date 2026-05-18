@@ -276,12 +276,37 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       warmUpCvAssets(versionedPath);
       setIsCvPrimed(true);
     };
-    if (!isCvOpen) return;
-    void runWarmUp();
+    if ("requestIdleCallback" in globalThis) {
+      const idleId = globalThis.requestIdleCallback(
+        () => {
+          void runWarmUp();
+        },
+        { timeout: 1800 },
+      );
+      return () => {
+        isCancelled = true;
+        globalThis.cancelIdleCallback(idleId);
+      };
+    }
+    const timeoutId = globalThis.setTimeout(() => {
+      void runWarmUp();
+    }, 900);
     return () => {
       isCancelled = true;
+      globalThis.clearTimeout(timeoutId);
     };
-  }, [isCvOpen]);
+  }, []);
+
+  useEffect(() => {
+    if (!isCvOpen || isCvPrimed) return;
+    if (warmUpTriggeredRef.current) return;
+    warmUpTriggeredRef.current = true;
+    void resolveVersionedCvPath().then((versionedPath) => {
+      setResolvedCvPath(versionedPath);
+      warmUpCvAssets(versionedPath);
+      setIsCvPrimed(true);
+    });
+  }, [isCvOpen, isCvPrimed]);
 
   useEffect(() => {
     if (!isCvOpen) return;
