@@ -7,6 +7,14 @@ type PortfolioTopbarProps = {
   mode: "hero" | "sticky";
   current: LocalizedContent;
   locale: Locale;
+  activeSection:
+    | "home"
+    | "about"
+    | "work"
+    | "skills"
+    | "pipeline"
+    | "engineering"
+    | "contact";
   localeOptions: Array<{ label: string; value: Locale }>;
   trackedSectionRoutes: {
     home: string;
@@ -34,6 +42,7 @@ export function PortfolioTopbar({
   mode,
   current,
   locale,
+  activeSection,
   localeOptions,
   trackedSectionRoutes,
   navigateToSection,
@@ -44,7 +53,8 @@ export function PortfolioTopbar({
       className={`topbar ${mode === "hero" ? "topbar--hero" : "topbar--sticky"} ${mode === "sticky" ? "js-topbar" : ""}`}
     >
       <a
-        className="brand-mark"
+        aria-current={activeSection === "home" ? "page" : undefined}
+        className={`brand-mark ${activeSection === "home" ? "is-active" : ""}`.trim()}
         href={trackedSectionRoutes.home}
         onClick={navigateToSection("home")}
       >
@@ -54,6 +64,8 @@ export function PortfolioTopbar({
       <div className="topbar-actions">
         <nav aria-label="Primary" className="topnav">
           <a
+            aria-current={activeSection === "about" ? "page" : undefined}
+            className={activeSection === "about" ? "is-active" : undefined}
             href={trackedSectionRoutes.about}
             onClick={navigateToSection("about")}
           >
@@ -63,6 +75,8 @@ export function PortfolioTopbar({
             </span>
           </a>
           <a
+            aria-current={activeSection === "work" ? "page" : undefined}
+            className={activeSection === "work" ? "is-active" : undefined}
             href={trackedSectionRoutes.work}
             onClick={navigateToSection("work")}
           >
@@ -72,6 +86,8 @@ export function PortfolioTopbar({
             </span>
           </a>
           <a
+            aria-current={activeSection === "skills" ? "page" : undefined}
+            className={activeSection === "skills" ? "is-active" : undefined}
             href={trackedSectionRoutes.skills}
             onClick={navigateToSection("skills")}
           >
@@ -81,6 +97,8 @@ export function PortfolioTopbar({
             </span>
           </a>
           <a
+            aria-current={activeSection === "pipeline" ? "page" : undefined}
+            className={activeSection === "pipeline" ? "is-active" : undefined}
             href={trackedSectionRoutes.pipeline}
             onClick={navigateToSection("pipeline")}
           >
@@ -90,6 +108,8 @@ export function PortfolioTopbar({
             </span>
           </a>
           <a
+            aria-current={activeSection === "engineering" ? "page" : undefined}
+            className={activeSection === "engineering" ? "is-active" : undefined}
             href={trackedSectionRoutes.engineering}
             onClick={navigateToSection("engineering")}
           >
@@ -99,6 +119,8 @@ export function PortfolioTopbar({
             </span>
           </a>
           <a
+            aria-current={activeSection === "contact" ? "page" : undefined}
+            className={activeSection === "contact" ? "is-active" : undefined}
             href={trackedSectionRoutes.contact}
             onClick={navigateToSection("contact")}
           >

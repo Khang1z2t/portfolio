@@ -2,7 +2,7 @@
 
 import { Cross2Icon } from "@radix-ui/react-icons";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { FeaturedProject, LocalizedContent } from "@/data/portfolio";
 
@@ -12,16 +12,41 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
   const [previewProject, setPreviewProject] = useState<FeaturedProject | null>(
     null,
   );
+  const previewModalRef = useRef<HTMLDivElement | null>(null);
+  const previewLastFocusedRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!previewProject) return;
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const modalNode = previewModalRef.current;
+    const focusableSelector =
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+    const focusable = modalNode
+      ? Array.from(modalNode.querySelectorAll<HTMLElement>(focusableSelector))
+      : [];
+    const firstFocusable = focusable[0] ?? modalNode;
+    const lastFocusable = focusable[focusable.length - 1] ?? modalNode;
+    firstFocusable?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setPreviewProject(null);
+        return;
+      }
+      if (event.key !== "Tab" || !modalNode) return;
+      if (!firstFocusable || !lastFocusable) return;
+
+      if (event.shiftKey && document.activeElement === firstFocusable) {
+        event.preventDefault();
+        lastFocusable.focus();
+        return;
+      }
+      if (!event.shiftKey && document.activeElement === lastFocusable) {
+        event.preventDefault();
+        firstFocusable.focus();
       }
     };
 
@@ -29,6 +54,7 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
     return () => {
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      previewLastFocusedRef.current?.focus();
     };
   }, [previewProject]);
 
@@ -67,7 +93,8 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
                     project.visibility !== "confidential" ? (
                       <button
                         className="project-link"
-                        onClick={() => {
+                        onClick={(event) => {
+                          previewLastFocusedRef.current = event.currentTarget;
                           setPreviewProject(project);
                         }}
                         type="button"
@@ -125,6 +152,7 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
             aria-label={previewProject.title}
             aria-modal="true"
             className="project-preview-modal"
+            ref={previewModalRef}
             role="dialog"
             tabIndex={-1}
           >

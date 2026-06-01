@@ -2,6 +2,7 @@ import { Cross2Icon, DownloadIcon } from "@radix-ui/react-icons";
 
 type CvModalProps = {
   isCvOpen: boolean;
+  modalRef: React.RefObject<HTMLDivElement | null>;
   isCvPrimed: boolean;
   cvPath: string;
   cvTitle: string;
@@ -17,6 +18,7 @@ type CvModalProps = {
 export function CvModal({
   isCvOpen,
   isCvPrimed,
+  modalRef,
   cvPath,
   cvTitle,
   viewCvLabel,
@@ -41,6 +43,7 @@ export function CvModal({
         aria-label={cvTitle}
         aria-modal="true"
         className="cv-modal"
+        ref={modalRef}
         onClick={(event) => {
           event.stopPropagation();
         }}

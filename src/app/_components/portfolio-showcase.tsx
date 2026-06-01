@@ -166,7 +166,12 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
   const [locale, setLocale] = useState<Locale>("en");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [activeSection, setActiveSection] = useState<
+    Exclude<keyof typeof trackedSectionRoutes, "cv">
+  >("home");
   const [isCvOpen, setIsCvOpen] = useState(false);
+  const cvModalRef = useRef<HTMLDivElement | null>(null);
+  const cvLastFocusedRef = useRef<HTMLElement | null>(null);
   const [isCvPrimed, setIsCvPrimed] = useState(false);
   const [resolvedCvPath, setResolvedCvPath] = useState(cvPath);
   const [currentPath, setCurrentPath] = useState(initialPathname);
@@ -233,6 +238,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       const nextPath = trackedSectionRoutes[section];
       const isCurrentPath = currentPath === nextPath;
       if (section === "cv") {
+        cvLastFocusedRef.current = event.currentTarget;
         if (currentPath !== trackedSectionRoutes.cv) {
           lastNonCvPathRef.current = currentPath;
         }
@@ -310,15 +316,43 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
 
   useEffect(() => {
     if (!isCvOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsCvOpen(false);
-    };
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const modalNode = cvModalRef.current;
+    const focusableSelector =
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+    const focusable = modalNode
+      ? Array.from(modalNode.querySelectorAll<HTMLElement>(focusableSelector))
+      : [];
+    const firstFocusable = focusable[0] ?? modalNode;
+    const lastFocusable = focusable[focusable.length - 1] ?? modalNode;
+    firstFocusable?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsCvOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !modalNode) return;
+      if (!firstFocusable || !lastFocusable) return;
+
+      if (event.shiftKey && document.activeElement === firstFocusable) {
+        event.preventDefault();
+        lastFocusable.focus();
+        return;
+      }
+      if (!event.shiftKey && document.activeElement === lastFocusable) {
+        event.preventDefault();
+        firstFocusable.focus();
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      cvLastFocusedRef.current?.focus();
     };
   }, [isCvOpen]);
   useEffect(() => {
@@ -330,6 +364,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
     const section = pathToSectionId[currentPath];
     if (!section) return;
     if (section === "cv") return setIsCvOpen(true);
+    setActiveSection((prev) => (prev === section ? prev : section));
     lastNonCvPathRef.current = currentPath;
     setIsCvOpen(false);
     if (skipNextPathScrollRef.current) {
@@ -356,8 +391,11 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       setShowStickyHeader((prev) => (prev === nextSticky ? prev : nextSticky));
 
       if (window.location.pathname === trackedSectionRoutes.cv) return;
-      const activeSection = resolveActiveSectionFromScroll();
-      const nextPath = trackedSectionRoutes[activeSection];
+      const nextActiveSection = resolveActiveSectionFromScroll();
+      setActiveSection((prev) =>
+        prev === nextActiveSection ? prev : nextActiveSection,
+      );
+      const nextPath = trackedSectionRoutes[nextActiveSection];
       if (currentPath !== nextPath) {
         skipNextSectionScrollRef.current = true;
         lastNonCvPathRef.current = nextPath;
@@ -593,6 +631,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
           mode="sticky"
           current={current}
           locale={locale}
+          activeSection={activeSection}
           localeOptions={localeOptions}
           trackedSectionRoutes={trackedSectionRoutes}
           navigateToSection={navigateToSection}
@@ -611,6 +650,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
             mode="hero"
             current={current}
             locale={locale}
+            activeSection={activeSection}
             localeOptions={localeOptions}
             trackedSectionRoutes={trackedSectionRoutes}
             navigateToSection={navigateToSection}
@@ -655,6 +695,7 @@ export function PortfolioShowcase({ content }: PortfolioShowcaseProps) {
       <CvModal
         isCvOpen={isCvOpen}
         isCvPrimed={isCvPrimed}
+        modalRef={cvModalRef}
         cvPath={resolvedCvPath}
         cvTitle={current.labels.cvTitle}
         viewCvLabel={current.labels.viewCv}
