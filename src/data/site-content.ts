@@ -10,6 +10,7 @@ export type LocalizedFeaturedProject = {
   visibility?: "public" | "private" | "confidential";
   techStack?: string[];
   previewImage?: string;
+  previewImages?: string[];
   previewAlt?: string;
 };
 
@@ -297,6 +298,26 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
         ],
       },
       {
+        title: "StoreOps",
+        type: "Interview Project — Convenience Store Order Management",
+        summary:
+          "A simplified full-stack order management app for 7-Eleven interview preparation, with role-based flows for admin and employee operations.",
+        impact:
+          "Shipped a deployed MVP with JWT auth, product/order CRUD, status tracking, and admin dashboard workflows in a compact timeline.",
+        repoUrl: "https://github.com/Khang1z2t/StoreOps",
+        liveUrl: "https://storeops.khangyuno.id.vn/",
+        previewImages: ["/projects/storeops-1.png", "/projects/storeops-2.png"],
+        previewAlt: "StoreOps project preview",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "Next.js",
+          "TypeScript",
+          "PostgreSQL",
+          "JWT",
+        ],
+      },
+      {
         title: "ACB Internal E-Form & Approval System",
         type: "Enterprise Banking — Production Internship",
         summary:
@@ -509,6 +530,26 @@ export const localizedContent: Record<Locale, LocalizedContent> = {
           "ReactJS",
           "Keycloak",
           "Camunda",
+          "JWT",
+        ],
+      },
+      {
+        title: "StoreOps",
+        type: "Project phỏng vấn — quản lý đơn hàng cửa hàng tiện lợi",
+        summary:
+          "Ứng dụng full-stack quản lý đơn hàng bản gọn để chuẩn bị phỏng vấn 7-Eleven, với luồng phân quyền cho admin và nhân viên.",
+        impact:
+          "Hoàn thiện và deploy một MVP có JWT auth, CRUD sản phẩm/đơn hàng, theo dõi trạng thái và dashboard admin trong thời gian ngắn.",
+        repoUrl: "https://github.com/Khang1z2t/StoreOps",
+        liveUrl: "https://storeops.khangyuno.id.vn/",
+        previewImages: ["/projects/storeops-1.png", "/projects/storeops-2.png"],
+        previewAlt: "StoreOps project preview",
+        techStack: [
+          "Java",
+          "Spring Boot",
+          "Next.js",
+          "TypeScript",
+          "PostgreSQL",
           "JWT",
         ],
       },

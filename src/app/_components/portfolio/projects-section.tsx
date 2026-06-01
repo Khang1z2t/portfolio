@@ -1,6 +1,6 @@
 "use client";
 
-import { Cross2Icon } from "@radix-ui/react-icons";
+import { ChevronLeftIcon, ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -12,8 +12,22 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
   const [previewProject, setPreviewProject] = useState<FeaturedProject | null>(
     null,
   );
+  const [previewIndex, setPreviewIndex] = useState(0);
   const previewModalRef = useRef<HTMLDivElement | null>(null);
   const previewLastFocusedRef = useRef<HTMLElement | null>(null);
+
+  const previewImages = previewProject
+    ? previewProject.previewImages && previewProject.previewImages.length > 0
+      ? previewProject.previewImages
+      : previewProject.previewImage
+        ? [previewProject.previewImage]
+        : []
+    : [];
+  const hasMultiplePreviewImages = previewImages.length > 1;
+  const currentPreviewImage =
+    previewImages.length > 0
+      ? previewImages[Math.min(previewIndex, previewImages.length - 1)]
+      : null;
 
   useEffect(() => {
     if (!previewProject) return;
@@ -36,6 +50,18 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
         setPreviewProject(null);
         return;
       }
+      if (hasMultiplePreviewImages && event.key === "ArrowLeft") {
+        setPreviewIndex((prev) =>
+          prev === 0 ? previewImages.length - 1 : prev - 1,
+        );
+        return;
+      }
+      if (hasMultiplePreviewImages && event.key === "ArrowRight") {
+        setPreviewIndex((prev) =>
+          prev === previewImages.length - 1 ? 0 : prev + 1,
+        );
+        return;
+      }
       if (event.key !== "Tab" || !modalNode) return;
       if (!firstFocusable || !lastFocusable) return;
 
@@ -56,7 +82,7 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
       window.removeEventListener("keydown", onKeyDown);
       previewLastFocusedRef.current?.focus();
     };
-  }, [previewProject]);
+  }, [hasMultiplePreviewImages, previewImages.length, previewProject]);
 
   return (
     <>
@@ -89,13 +115,16 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
                     </div>
                   ) : null}
                   <div className="project-links">
-                    {project.previewImage &&
-                    project.visibility !== "confidential" ? (
+                    {project.previewImage ||
+                    (project.previewImages &&
+                      project.previewImages.length > 0 &&
+                      project.visibility !== "confidential") ? (
                       <button
                         className="project-link"
                         onClick={(event) => {
                           previewLastFocusedRef.current = event.currentTarget;
                           setPreviewProject(project);
+                          setPreviewIndex(0);
                         }}
                         type="button"
                       >
@@ -138,7 +167,7 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
         </div>
       </section>
 
-      {previewProject?.previewImage ? (
+      {previewProject && currentPreviewImage ? (
         <div className="project-preview-overlay">
           <button
             aria-label={current.labels.close}
@@ -168,17 +197,64 @@ export function ProjectsSection({ current }: ProjectsSectionProps) {
             </button>
 
             <div className="project-preview-media-wrap">
+              {hasMultiplePreviewImages ? (
+                <button
+                  aria-label="Previous preview image"
+                  className="project-preview-nav project-preview-nav-prev"
+                  onClick={() => {
+                    setPreviewIndex((prev) =>
+                      prev === 0 ? previewImages.length - 1 : prev - 1,
+                    );
+                  }}
+                  type="button"
+                >
+                  <ChevronLeftIcon />
+                </button>
+              ) : null}
+
               <Image
                 alt={previewProject.previewAlt ?? previewProject.title}
                 className="project-preview-image"
                 height={720}
-                src={previewProject.previewImage}
+                src={currentPreviewImage}
                 unoptimized
                 width={1200}
               />
+
+              {hasMultiplePreviewImages ? (
+                <button
+                  aria-label="Next preview image"
+                  className="project-preview-nav project-preview-nav-next"
+                  onClick={() => {
+                    setPreviewIndex((prev) =>
+                      prev === previewImages.length - 1 ? 0 : prev + 1,
+                    );
+                  }}
+                  type="button"
+                >
+                  <ChevronRightIcon />
+                </button>
+              ) : null}
             </div>
 
             <div className="project-preview-footer">
+              {hasMultiplePreviewImages ? (
+                <div className="project-preview-dots" role="tablist" aria-label="Preview images">
+                  {previewImages.map((image, index) => (
+                    <button
+                      aria-label={`Go to image ${index + 1}`}
+                      aria-selected={previewIndex === index}
+                      className={`project-preview-dot ${previewIndex === index ? "is-active" : ""}`.trim()}
+                      key={image}
+                      onClick={() => {
+                        setPreviewIndex(index);
+                      }}
+                      role="tab"
+                      type="button"
+                    />
+                  ))}
+                </div>
+              ) : null}
               <div className="project-preview-actions">
                 {previewProject.liveUrl ? (
                   <a
